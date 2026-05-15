@@ -10,9 +10,6 @@
 >
 > This Chinese localized version is based on the [PrioSpace](https://github.com/AnoyRC/priospace) project developed by **Anoy Roy Chowdhury**. We sincerely thank the original author for this excellent open-source work.
 
----
-
-[在线体验 / Try it out](https://prio.space/home) | [App Store 下载](https://apps.apple.com/us/app/prio-space/id6752712865)
 
 一款精美、现代的生产力应用，集成了任务管理、番茄计时器、习惯追踪和实时协作功能。使用 Next.js、React 和 Framer Motion 构建，带来流畅动画和优质用户体验。
 
