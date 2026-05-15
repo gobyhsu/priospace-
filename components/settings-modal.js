@@ -37,8 +37,12 @@ export function SettingsModal({
   onUpdateCustomTag,
   onDeleteCustomTag,
   onResetApp,
+  weatherCity,
+  onSetWeatherCity,
 }) {
   const [editingTagId, setEditingTagId] = useState(null);
+  const [weatherInput, setWeatherInput] = useState(weatherCity?.name || "");
+  const [weatherSaving, setWeatherSaving] = useState(false);
   const [editName, setEditName] = useState("");
   const modalRef = useRef(null);
 
@@ -55,18 +59,8 @@ export function SettingsModal({
   const themes = [
     {
       id: "default",
-      name: "Default",
-      description: "Classic warm tones",
-      preview: {
-        primary: "#8B4B3C",
-        secondary: "#B8906B",
-        background: "#F5F1EB",
-      },
-    },
-    {
-      id: "nature",
-      name: "Nature",
-      description: "Fresh green vibes",
+      name: "默认",
+      description: "清新绿色氛围",
       preview: {
         primary: "#2D5A1B",
         secondary: "#6BA341",
@@ -74,9 +68,19 @@ export function SettingsModal({
       },
     },
     {
+      id: "nature",
+      name: "经典",
+      description: "经典暖色调",
+      preview: {
+        primary: "#8B4B3C",
+        secondary: "#B8906B",
+        background: "#F5F1EB",
+      },
+    },
+    {
       id: "neo-brutal",
-      name: "Neo Brutal",
-      description: "Bold and striking",
+      name: "新野兽派",
+      description: "大胆醒目",
       preview: {
         primary: "#FF0000",
         secondary: "#FFFF00",
@@ -85,8 +89,8 @@ export function SettingsModal({
     },
     {
       id: "modern",
-      name: "Modern",
-      description: "Clean and minimal",
+      name: "现代",
+      description: "干净极简",
       preview: {
         primary: "#171717",
         secondary: "#F5F5F5",
@@ -95,8 +99,8 @@ export function SettingsModal({
     },
     {
       id: "pastel-dream",
-      name: "Pastel Dream",
-      description: "Soft lavender & pink tones",
+      name: "粉彩梦境",
+      description: "柔和薰衣草与粉色调",
       preview: {
         primary: "#D67AD2",
         secondary: "#A2DCEF",
@@ -105,8 +109,8 @@ export function SettingsModal({
     },
     {
       id: "quantum-rose",
-      name: "Quantum Rose",
-      description: "Vibrant pink & teal fusion",
+      name: "量子玫瑰",
+      description: "鲜艳粉红与青色融合",
       preview: {
         primary: "#D93A7D",
         secondary: "#2DD8C6",
@@ -115,8 +119,8 @@ export function SettingsModal({
     },
     {
       id: "twitter",
-      name: "Twitter",
-      description: "Blues & clean contrast",
+      name: "推特",
+      description: "蓝色与干净对比",
       preview: {
         primary: "#1DA1F2",
         secondary: "#F7F9F9",
@@ -125,8 +129,8 @@ export function SettingsModal({
     },
     {
       id: "amber-minimal",
-      name: "Amber Minimal",
-      description: "Clean amber & white minimalism",
+      name: "琥珀极简",
+      description: "干净琥珀与白色极简",
       preview: {
         primary: "#F59E0B",
         secondary: "#E0E7FF",
@@ -204,8 +208,14 @@ export function SettingsModal({
   };
 
   const handleWebRTCShare = () => {
-    onClose(); // Close settings first
-    onOpenWebRTCShare(); // Open WebRTC share modal
+    onClose();
+    onOpenWebRTCShare();
+  };
+
+  const handleSaveWeatherCity = async () => {
+    setWeatherSaving(true);
+    await onSetWeatherCity(weatherInput);
+    setWeatherSaving(false);
   };
 
   const ThemePreview = ({ themeData, isSelected, onClick }) => (
@@ -315,7 +325,7 @@ export function SettingsModal({
                 <Settings className="h-5 w-5 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                Settings
+                设置
               </h2>
             </div>
             <Button
@@ -341,10 +351,10 @@ export function SettingsModal({
                   <Palette className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      Theme
+                      主题
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      Choose your style
+                      选择你的风格
                     </div>
                   </div>
                 </div>
@@ -412,12 +422,12 @@ export function SettingsModal({
                   </motion.div>
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      {darkMode ? "Dark Mode" : "Light Mode"}
+                      {darkMode ? "深色模式" : "浅色模式"}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                       {darkMode
-                        ? "Switch to light theme"
-                        : "Switch to dark theme"}
+                        ? "切换到浅色主题"
+                        : "切换到深色主题"}
                     </div>
                   </div>
                 </div>
@@ -441,6 +451,44 @@ export function SettingsModal({
               </div>
             </motion.div>
 
+            {/* Weather */}
+            <motion.div variants={itemVariants}>
+              <div className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Sun className="h-5 w-5 text-primary" />
+                  <div>
+                    <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                      天气
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                      设置城市以显示当地天气
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="输入城市名称，如：北京"
+                    value={weatherInput}
+                    onChange={(e) => setWeatherInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveWeatherCity()}
+                    className="flex-1 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 font-bold"
+                  />
+                  <Button
+                    onClick={handleSaveWeatherCity}
+                    disabled={weatherSaving}
+                    className="font-extrabold px-4"
+                  >
+                    {weatherSaving ? "..." : "确定"}
+                  </Button>
+                </div>
+                {weatherCity && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    当前城市：{weatherCity.name}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
             <motion.div
               variants={itemVariants}
               className="flex flex-col gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80"
@@ -449,10 +497,10 @@ export function SettingsModal({
                 <Tag className="h-5 w-5 text-primary" />
                 <div>
                   <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                    Manage Categories
+                    管理分类
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    Edit or delete your categories
+                    编辑或删除你的分类
                   </div>
                 </div>
               </div>
@@ -460,7 +508,7 @@ export function SettingsModal({
               <div className="max-h-60 overflow-y-auto hide-scroll flex flex-col gap-1">
                 {customTags.length === 0 ? (
                   <p className="text-sm text-gray-500 italic p-4 text-center">
-                    No categories created yet.
+                    还没有创建分类。
                   </p>
                 ) : (
                   customTags.map((tag) => (
@@ -537,10 +585,10 @@ export function SettingsModal({
                   <Wifi className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <div>
                     <div className="font-extrabold text-blue-700 dark:text-blue-300">
-                      Sync Tasks (P2P)
+                      同步任务 (P2P)
                     </div>
                     <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                      Sync your tasks from/with another device
+                      从/向其他设备同步任务
                     </div>
                   </div>
                 </div>
@@ -565,10 +613,10 @@ export function SettingsModal({
                   <Upload className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      Export Data
+                      导出数据
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      Backup your tasks and habits
+                      备份任务和习惯
                     </div>
                   </div>
                 </div>
@@ -595,10 +643,10 @@ export function SettingsModal({
                   <Download className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      Import Data
+                      导入数据
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      Restore from backup file
+                      从备份文件恢复
                     </div>
                   </div>
                 </div>
@@ -618,23 +666,6 @@ export function SettingsModal({
               </div>
             </motion.div>
 
-            {/* Buy Me a Coffee */}
-            <motion.div variants={itemVariants}>
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <Button
-                  onClick={handleBuyMeCoffee}
-                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-extrabold py-4 rounded-xl shadow-lg border-0"
-                >
-                  <Heart className="h-5 w-5 mr-2 fill-current" />
-                  Buy Me a Coffee
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
-              </motion.div>
-            </motion.div>
-
             {/* App Info */}
             <motion.div
               variants={itemVariants}
@@ -642,10 +673,10 @@ export function SettingsModal({
             >
               <div className="text-center space-y-3">
                 <div className="text-lg font-extrabold text-primary">
-                  Prio Space V1.3.0
+                  优事空间 PrioSpace V1.3.0-zh-CN
                 </div>
                 <div className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                  Focus • Track • Achieve
+                  专注 · 追踪 · 成就
                 </div>
 
                 {/* vibecoded section */}
@@ -677,6 +708,12 @@ export function SettingsModal({
                       Anoy Roy Chowdhury
                     </motion.button>
                   </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 font-medium pt-2">
+                    汉化 by{" "}
+                    <span className="text-primary font-extrabold">
+                      迷汁逃桃
+                    </span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -688,10 +725,10 @@ export function SettingsModal({
                 <AlertTriangle className="h-5 w-5 text-red-500" />
                 <div>
                   <div className="font-extrabold text-red-600 dark:text-red-400">
-                    Reset Prio Space
+                    重置优事空间
                   </div>
                   <div className="text-sm text-red-500/70 dark:text-red-400/60 font-medium">
-                    Permanently delete all data
+                    永久删除所有数据
                   </div>
                 </div>
               </div>
@@ -705,7 +742,7 @@ export function SettingsModal({
                   size="sm"
                   className="rounded-xl font-extrabold px-4"
                 >
-                  Reset
+                  重置
                 </Button>
               </motion.div>
             </div>

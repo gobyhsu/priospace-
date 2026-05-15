@@ -1,293 +1,195 @@
-# 🎯 Prio.Space
+# 🎯 优事空间 PrioSpace
 
-[Try it out](https://prio.space/home) | [Download from App Store](https://apps.apple.com/us/app/prio-space/id6752712865)
+> **致谢 / Acknowledgements**
+>
+> 本中文汉化版及修改内容基于 **Anoy Roy Chowdhury** 开发的 [PrioSpace](https://github.com/AnoyRC/priospace) 项目。
+>
+> 我们非常感谢原作者带来的优秀开源作品。
+>
+> 原项目许可证：**MIT License**
+>
+> This Chinese localized version is based on the [PrioSpace](https://github.com/AnoyRC/priospace) project developed by **Anoy Roy Chowdhury**. We sincerely thank the original author for this excellent open-source work.
+
+---
+
+[在线体验 / Try it out](https://prio.space/home) | [App Store 下载](https://apps.apple.com/us/app/prio-space/id6752712865)
+
+一款精美、现代的生产力应用，集成了任务管理、番茄计时器、习惯追踪和实时协作功能。使用 Next.js、React 和 Framer Motion 构建，带来流畅动画和优质用户体验。
 
 A beautiful, modern productivity app that combines task management with Pomodoro timer functionality, habit tracking, and real-time collaboration. Built with Next.js, React, and Framer Motion for smooth animations and premium user experience.
 
-![Todo Timer](https://img.shields.io/badge/Version-2.1-blue)
+![Version](https://img.shields.io/badge/Version-1.3.0--zh--CN-green)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)
 ![WebRTC](https://img.shields.io/badge/WebRTC-Enabled-green)
 
-## ✨ Features
+---
 
-### 📝 Task Management
-- Create, edit, and manage tasks and habits
-- **Subtasks support** - Break down complex tasks into manageable subtasks
-- Organize tasks with custom color-coded categories
-- Mark tasks as complete with smooth animations
-- Hold-to-complete gesture for mobile-friendly interaction
-- Separate sections for regular tasks and habits
+## 📋 修改声明 / Modification Notice
 
-### 🌐 Task Sharing
-- **WebRTC-powered task sharing**
-- Peer-to-peer connection for instant synchronization
-- Share tasks and progress with team members in real-time
-- No server dependency for peer connections after initial handshake
+**优事空间 PrioSpace 中文汉化版**
 
-### ⏱️ Pomodoro Timer
-- Customizable timer presets (5, 10, 25, 50 minutes)
-- Real-time countdown with animated display
-- Overtime tracking for extended work sessions
-- Break timer with automatic transitions
-- Focus time tracking for productivity insights
-- Music player-style controls (play/pause/stop)
+本项目基于 Anoy Roy Chowdhury 开发的 [PrioSpace](https://github.com/AnoyRC/priospace) 项目（MIT License）进行二次开发。
 
-### 🔄 Habit Tracking
-- GitHub-style contribution graph for 30-day habit history
-- Monthly view with visual intensity indicators
-- Individual habit tracking with daily completion
-- Interactive grid for marking habit completion
-- Comprehensive habit analytics and progress visualization
+**修改内容：**
 
-### 🎨 Beautiful UI/UX
-- Modern bottom-sheet modal design
-- **4 stunning themes** with seamless theme selection
-- Smooth spring animations with Framer Motion
-- Responsive design optimized for mobile and desktop
-- Dark/Light mode support with enhanced theme system
-- Primary color theming throughout the app
-- Intuitive touch gestures and micro-interactions
+1. **全界面中文化**：将全部用户界面文本（约 170+ 处）从英文翻译为简体中文
+2. **品牌本地化**：中文名"优事空间"，标语"专注 · 追踪 · 成就"
+3. **日期格式本地化**：所有日期格式从 en-US 切换为 zh-CN，星期显示为中文
+4. **默认主题调整**：将默认主题颜色从暖棕色改为绿色
+5. **天气功能新增**：集成 Open-Meteo 免费天气 API，支持在设置中配置城市，主界面显示实时天气图标和温度
+6. **窗口标题中文化**
+7. **设置页面**：移除"Buy Me a Coffee"按钮，新增汉化署名"汉化 by 迷汁逃桃"
 
-### 📊 Data Management
-- Export/Import functionality for data backup
-- Local storage persistence
-- Enhanced settings panel with theme controls
-- Motivational intro screen with random quotes
+**未修改内容：**
 
-## 🚀 Getting Started
+- 原项目核心功能逻辑、组件结构、API 接口均未改动
+- 原作者信息及版权声明在设置页面中保留
+- 原项目许可证（MIT License）继续适用
 
-### Prerequisites
+**汉化作者：** 迷汁逃桃
 
-- Node.js 18+ 
-- npm or yarn package manager
+本修改版同样遵循 MIT License 开源协议。
 
-### Installation
+---
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/anoyrc/priospace.git
-   cd priospace
-   ```
+## ✨ 功能特性 / Features
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+### 📝 任务管理 / Task Management
+- 创建、编辑和管理任务和习惯 / Create, edit, and manage tasks and habits
+- **子任务支持** — 将复杂任务拆分为可管理的子任务 / **Subtasks support** - Break down complex tasks
+- 使用自定义颜色分类组织任务 / Organize with custom color-coded categories
+- 流畅动画完成任务标记 / Mark tasks complete with smooth animations
+- 长按完成手势，适合移动端 / Hold-to-complete gesture for mobile
+- 常规任务和习惯分区显示 / Separate sections for tasks and habits
 
-3. **Set up WebRTC Server (for collaboration features)**
-   ```bash
-   cd webrtc-server
-   npm install
-   npm run start
-   ```
-   
-   The WebRTC signaling server will start on the default port. Make sure this is running before using collaboration features.
+### 🌐 任务共享 / Task Sharing
+- **WebRTC 驱动的任务共享** / **WebRTC-powered task sharing**
+- 点对点连接，即时同步 / Peer-to-peer connection for instant synchronization
+- 实时与团队成员分享任务和进度 / Share tasks and progress in real-time
 
-4. **Run the development server**
-   ```bash
-   # Navigate back to root directory
-   cd ..
-   npm run dev
-   # or
-   yarn dev
-   ```
+### ⏱️ 番茄计时器 / Pomodoro Timer
+- 可自定义计时器预设（5、10、25、50 分钟）/ Customizable timer presets
+- 实时倒计时动画显示 / Real-time countdown with animated display
+- 超时追踪 / Overtime tracking
+- 休息计时器，自动切换 / Break timer with automatic transitions
+- 专注时间追踪 / Focus time tracking
 
-5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+### 🔄 习惯追踪 / Habit Tracking
+- GitHub 风格的 30 天贡献热力图 / GitHub-style contribution graph for 30-day history
+- 月度视图，可视化强度指标 / Monthly view with visual intensity indicators
+- 单个习惯每日完成追踪 / Individual habit tracking with daily completion
+- 习惯分析和进度可视化 / Habit analytics and progress visualization
 
-## 🏗️ Tech Stack
+### 🌤️ 天气功能 / Weather（新增）
+- 在设置中配置城市 / Configure city in settings
+- 主界面显示实时天气图标和温度 / Display real-time weather icon and temperature
+- 数据来自 Open-Meteo 免费天气 API / Powered by Open-Meteo free weather API
+- 每小时自动刷新 / Auto-refresh every hour
 
-### Frontend
-- **Next.js 15** - React framework with App Router
-- **React 19** - UI library with hooks and modern patterns
-- **TypeScript** - Type-safe JavaScript development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library for smooth interactions
+### 🎨 精美界面 / Beautiful UI/UX
+- 现代底部弹窗设计 / Modern bottom-sheet modal design
+- **8 种精美主题**，无缝切换 / **8 stunning themes** with seamless selection
+- Framer Motion 流畅弹性动画 / Smooth spring animations
+- 响应式设计，适配移动端和桌面端 / Responsive design for mobile and desktop
+- 深色/浅色模式 / Dark/Light mode support
+- 直观触摸手势和微交互 / Intuitive touch gestures and micro-interactions
 
-### Real-time Features
-- **WebRTC** - Peer-to-peer real-time communication
-- **WebSocket** - Signaling server for WebRTC handshake
-- **Node.js** - Backend server for WebRTC signaling
+---
 
-### UI Components
-- **shadcn/ui** - High-quality, accessible UI components
-- **Lucide React** - Beautiful, customizable icons
-- **Custom Components** - CountdownTimer, CircleProgress, and modal systems
+## 🚀 快速开始 / Getting Started
 
-### State Management
-- **React Hooks** - useState, useEffect, useRef for state management
-- **Local Storage** - Data persistence in browser
-- **Context API** - Theme and global state management
+### 前置条件 / Prerequisites
+- Node.js 18+
+- npm 或 yarn / npm or yarn
 
-## 📁 Project Structure
-
-```
-priospace/
-├── app/                    # Next.js App Router
-│   ├── globals.css        # Global styles and Tailwind imports
-│   ├── layout.tsx         # Root layout with providers
-│   └── page.tsx           # Main application page
-├── components/            # Reusable components
-├── lib/                   # Utility functions
-│   └── utils.ts          # Helper functions and utilities
-├── webrtc-server/         # WebRTC signaling server
-│   ├── server.js         # Express server with WebSocket support
-│   ├── package.json      # Server dependencies
-│   └── ...
-├── public/               # Static assets
-└── package.json          # Dependencies and scripts
-```
-
-## 🎮 Usage
-
-### Creating Tasks with Subtasks
-1. Click the **"Add Task"** button
-2. Enter your task title in the borderless input
-3. Optionally select or create a category with custom colors
-4. **Add subtasks** by clicking the subtask option
-5. Break down complex tasks into manageable chunks
-6. Click **"Add Task"** to save
-
-### Using the Timer
-1. Select a task from your list
-2. Choose a timer preset (5, 10, 25, or 50 minutes)
-3. Use the music player-style controls:
-   - **Play/Pause** - Start or pause the timer
-   - **Stop** - Reset the timer to original time
-   - **Break** - Take a 5-minute break
-4. Complete your task when finished
-
-### Tracking Habits
-1. Open the **Habit Tracker** from the bottom navigation
-2. Add new habits with categories
-3. Click on grid squares to mark daily completions
-4. View your 30-day progress with GitHub-style visualization
-5. Navigate between habit overview and individual habit views
-
-### Theme Selection
-1. Access **Settings** to browse 8 beautiful themes
-2. Choose from enhanced color schemes
-3. Experience seamless theme transitions
-4. Themes persist across sessions
-
-### Managing Data
-1. Access **Settings** to:
-   - Select from 8 stunning themes
-   - Toggle between light and dark modes
-   - Auto Start Feature for Windows & Mac
-   - P2P Task Sync Feature
-   - Export your data as JSON backup
-   - Import previously exported data
-   - Support the developer with "Buy Me a Coffee"
-
-## 🔧 Configuration
-
-### WebRTC Server Setup
-The WebRTC server handles signaling for peer connections:
+### 安装 / Installation
 
 ```bash
-# Default server configuration
-cd webrtc-server
+# 克隆仓库 / Clone the repository
+git clone https://github.com/gobyhsu/priospace-.git
+cd priospace-
+
+# 安装依赖 / Install dependencies
 npm install
-npm run start
+
+# 启动开发服务器 / Run the development server
+npm run dev
 ```
 
-For production deployment, configure your server settings in `webrtc-server/server.js`.
+打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
-## 🌐 WebRTC Server Instructions
+### Windows 安装包构建 / Build Windows Installer
 
-### Development Setup
-1. **Navigate to the WebRTC server directory**
-   ```bash
-   cd webrtc-server
-   ```
+```bash
+# 需要安装 Rust 工具链 / Requires Rust toolchain
+npm run tauri build
+```
 
-2. **Install server dependencies**
-   ```bash
-   npm install
-   ```
+生成的安装包位于 `src-tauri/target/release/bundle/`
 
-3. **Start the signaling server**
-   ```bash
-   npm run start
-   ```
+---
 
-The server will handle WebRTC signaling for real-time collaboration features. Make sure it's running before using collaborative workspaces.
+## 🏗️ 技术栈 / Tech Stack
 
-### Production Deployment
-For production deployment of the WebRTC server:
+| 技术 / Technology | 用途 / Purpose |
+|---|---|
+| **Next.js 15** | React 框架（App Router，静态导出）/ React framework (App Router, static export) |
+| **React 19** | UI 库 / UI library |
+| **Tailwind CSS** | 实用优先 CSS 框架 / Utility-first CSS framework |
+| **Framer Motion** | 动画库 / Animation library |
+| **Tauri v2** | 桌面应用打包 / Desktop app packaging |
+| **Open-Meteo API** | 天气数据 / Weather data |
+| **WebRTC** | 点对点实时通信 / Peer-to-peer real-time communication |
+| **shadcn/ui + Lucide** | UI 组件和图标 / UI components and icons |
 
-1. Configure your production environment variables
-2. Set up proper CORS policies
-3. Use process managers like PM2 for server stability
-4. Consider using HTTPS for secure WebRTC connections
+---
 
-## 📱 Progressive Web App Features
+## 📁 项目结构 / Project Structure
 
-- Responsive design for mobile and desktop
-- Touch gestures and mobile-optimized interactions
-- Offline-ready with local storage persistence
-- Fast loading with Next.js optimization
-- Real-time collaboration that works across devices
+```
+priospace-/
+├── app/                    # Next.js App Router
+│   ├── globals.css         # 全局样式 / Global styles
+│   ├── layout.js           # 根布局 / Root layout
+│   ├── page.js             # 主应用页面 / Main application page
+│   └── home/page.js        # 着陆页 / Landing page
+├── components/             # 可复用组件 / Reusable components
+├── lib/                    # 工具函数 / Utility functions
+├── utils/                  # 工具模块 / Utility modules
+│   ├── time.js             # 时间格式化 / Time formatting
+│   └── weather.js          # 天气 API / Weather API
+├── public/                 # 静态资源 / Static assets
+├── src-tauri/              # Tauri 桌面应用 / Tauri desktop app
+├── webrtc-server/          # WebRTC 信令服务器 / Signaling server
+└── package.json            # 依赖配置 / Dependencies
+```
 
-## 🤝 Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🤝 贡献 / Contributing
 
-### Development Guidelines
-- Follow the existing code style and component patterns
-- Add appropriate animations with Framer Motion
-- Ensure responsive design works on all screen sizes
-- Test all 8 themes for consistency
-- Test WebRTC functionality with multiple peers
-- Maintain accessibility standards
-- Test subtask functionality thoroughly
+欢迎贡献！请 fork 本仓库并提交 Pull Request。
 
-## 🐛 Bug Reports & Feature Requests
+Contributions are welcome! Please fork this repository and submit a Pull Request.
 
-Please use the [GitHub Issues](https://github.com/anoyrc/priospace/issues) page to:
-- Report bugs with detailed reproduction steps
-- Request new features with clear use cases
-- Discuss improvements and suggestions
-- Report WebRTC connection issues
+---
 
-## 📄 License
+## 📄 许可证 / License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+本项目基于 MIT License 开源。原项目由 Anoy Roy Chowdhury 开发，同样采用 MIT License。
 
-## 🙏 Acknowledgments
-
-- **shadcn/ui** for the beautiful component library
-- **Framer Motion** for smooth animations
-- **Lucide** for the icon set
-- **Tailwind CSS** for the utility-first styling approach
-- **Next.js** team for the amazing React framework
-- **WebRTC** community for real-time communication standards
-
-## 💖 Support
-
-If you find this project helpful, consider:
-
-- ⭐ Starring the repository
-- 🐛 Reporting bugs or requesting features
-- ☕ [Buying me a coffee](https://coff.ee/anoy)
-- 🐦 Following [@Anoyroyc](https://x.com/Anoyroyc) on Twitter
+This project is licensed under the MIT License. The original project by Anoy Roy Chowdhury is also under the MIT License.
 
 ---
 
 <div align="center">
 
-**Coded with ❤️ by [Anoy Roy Chowdhury](https://x.com/Anoyroyc)**
+**原项目 / Original project by [Anoy Roy Chowdhury](https://x.com/Anoyroyc)**
 
-*Focus • Track • Achieve • Share*
+**中文汉化版 by 迷汁逃桃**
+
+*专注 · 追踪 · 成就 / Focus · Track · Achieve*
 
 </div>

@@ -5,24 +5,24 @@ import { useState, useEffect } from "react";
 import { CheckCircle, Timer, RotateCcw } from "lucide-react";
 
 const motivationalQuotes = [
-  "Focus on what matters.",
-  "Every day is a new beginning.",
-  "Small steps, big results.",
-  "Your time is your most valuable asset.",
-  "Achieve your goals, one task at a time.",
-  "Make today count.",
-  "Progress, not perfection.",
-  "Start where you are. Use what you have. Do what you can.",
-  "The best way to predict the future is to create it.",
-  "Discipline is choosing between what you want now and what you want most.",
-  "The journey of a thousand miles begins with a single step.",
-  "Believe you can and you're halfway there.",
-  "The future belongs to those who believe in the beauty of their dreams.",
-  "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-  "The only way to do great work is to love what you do.",
-  "Wake UP!",
-  "Make it COUNT!",
-  "You have no time to waste.",
+  "专注于重要的事。",
+  "每天都是新的开始。",
+  "小步积累，大成在望。",
+  "时间是你最宝贵的财富。",
+  "一次一个任务，实现你的目标。",
+  "让今天有意义。",
+  "追求进步，而非完美。",
+  "从现在开始，用你拥有的，做你能做的。",
+  "预测未来的最好方式就是创造未来。",
+  "自律，就是在现在想要的和最想要的之间做选择。",
+  "千里之行，始于足下。",
+  "相信你能，你就已经成功了一半。",
+  "未来属于那些相信梦想之美的人。",
+  "成功不是终点，失败也不是末日，继续前行的勇气才最重要。",
+  "做伟大工作的唯一方法就是热爱你所做的事。",
+  "醒醒！",
+  "让它有意义！",
+  "你没有时间可以浪费。",
 ];
 
 const containerVariants = {
@@ -175,14 +175,14 @@ export function IntroScreen({ onAnimationComplete }) {
             variants={logoVariants}
             className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-gray-100 text-center tracking-tight"
           >
-            Prio Space
+            优事空间 PrioSpace
           </motion.h1>
 
           <motion.div
             variants={logoVariants}
             className="text-lg font-bold text-primary uppercase tracking-wider"
           >
-            Focus • Track • Achieve
+            专注 · 追踪 · 成就
           </motion.div>
         </motion.div>
 

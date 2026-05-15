@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "priospace",
+        "title": "优事空间 PrioSpace",
         "width": 490,
         "height": 900,
         "resizable": true,

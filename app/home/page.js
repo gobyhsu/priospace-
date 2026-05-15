@@ -112,16 +112,14 @@ export default function LandingPage() {
               variants={fadeInUp}
               className="font-heading text-3xl font-extrabold flex flex-col items-center gap-4"
             >
-              Prio Space
+              优事空间 PrioSpace
             </motion.h1>
 
             <motion.p
               variants={fadeInUp}
               className="max-w-[50rem] text-muted-foreground text-4xl sm:text-6xl leading-20 font-extrabold"
             >
-              A beautiful, modern productivity app that combines powerful task
-              management with a Pomodoro timer, habit tracking, and task
-              collaboration.
+              一款精美、现代的生产力应用，集成了强大的任务管理、番茄计时器、习惯追踪和任务协作功能。
             </motion.p>
 
             <motion.div
@@ -140,7 +138,7 @@ export default function LandingPage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Play className="h-4 w-4" />
-                  Web
+                  网页
                 </motion.button>
               </Button>
 
@@ -177,7 +175,7 @@ export default function LandingPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Smartphone className="h-4 w-4" /> ios
+                  <Smartphone className="h-4 w-4" /> iOS
                 </motion.button>
               </Button>
 
@@ -237,7 +235,7 @@ export default function LandingPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Github className="h-4 w-4" /> Github
+                  <Github className="h-4 w-4" /> GitHub
                 </motion.button>
               </Button>
             </motion.div>
@@ -254,12 +252,11 @@ export default function LandingPage() {
               <CardContent className="flex flex-col items-center gap-4 p-6 sm:p-12 text-slate-50">
                 <div className="flex items-center gap-2">
                   <Github className="h-6 w-6 opacity-80" />
-                  <h2 className="text-lg font-extrabold">Open Source & Free</h2>
+                  <h2 className="text-lg font-extrabold">开源且免费</h2>
                 </div>
                 <div className="space-y-4">
                   <p className="max-w-[46rem] opacity-90 text-4xl font-extrabold leading-[2.7rem]">
-                    Prio Space is completely open source. Star the repository,
-                    contribute to the project, or fork it to make it your own.
+                    优事空间 PrioSpace 是完全开源的。给仓库加星标、为项目贡献代码，或者 fork 它来定制你自己的版本。
                   </p>
                 </div>
                 <Button
@@ -274,7 +271,7 @@ export default function LandingPage() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Star className="h-6 w-6 animate-pulse" />
-                    Star on GitHub
+                    在 GitHub 上星标
                   </motion.button>
                 </Button>
               </CardContent>
@@ -315,7 +312,7 @@ export default function LandingPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Coffee className="h-6 w-6 animate-pulse" />
-                Buy me a coffee
+                请我喝咖啡
               </motion.button>
             </Button>
           </div>

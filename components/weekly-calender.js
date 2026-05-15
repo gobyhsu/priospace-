@@ -61,11 +61,11 @@ export function WeeklyCalendar({ selectedDate, onDateSelect }) {
               }`}
             >
               <span className="text-xs font-semibold">
-                {date.toLocaleDateString("en-US", { weekday: "short" })}
+                {date.toLocaleDateString("zh-CN", { weekday: "short" })}
               </span>
               <span className="text-lg font-extrabold">{date.getDate()}</span>
               <span className="text-xs font-semibold">
-                {date.toLocaleDateString("en-US", { month: "short" })}
+                {date.toLocaleDateString("zh-CN", { month: "short" })}
               </span>
             </motion.button>
           ))}

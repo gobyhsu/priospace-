@@ -16,6 +16,14 @@ import { TimerModal } from "@/components/timer-modal";
 import { SettingsModal } from "@/components/settings-modal";
 import { IntroScreen } from "@/components/intro-screen";
 import { WebRTCShareModal } from "@/components/webrtc-share-modal";
+import {
+  geocodeCity,
+  fetchWeather,
+  getCachedWeather,
+  setCachedWeather,
+  getSavedCity,
+  saveCity,
+} from "@/utils/weather";
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
@@ -34,6 +42,44 @@ export default function Home() {
   const [showIntroScreen, setShowIntroScreen] = useState(true);
   const [parentTaskForSubtask, setParentTaskForSubtask] = useState(null);
   const [showWebRTCShare, setShowWebRTCShare] = useState(false);
+  const [weatherCity, setWeatherCity] = useState(null);
+  const [weatherCode, setWeatherCode] = useState(null);
+  const [weatherTemp, setWeatherTemp] = useState(null);
+
+  // Fetch weather data
+  const refreshWeather = async (city) => {
+    if (!city) return;
+    try {
+      const weather = await fetchWeather(city.latitude, city.longitude);
+      setWeatherCode(weather.code);
+      setWeatherTemp(weather.temperature);
+      setCachedWeather({
+        code: weather.code,
+        temperature: weather.temperature,
+        cityName: city.name,
+      });
+    } catch (e) {
+      console.log("Weather fetch failed:", e);
+    }
+  };
+
+  const handleSetWeatherCity = async (cityName) => {
+    if (!cityName.trim()) {
+      setWeatherCity(null);
+      setWeatherCode(null);
+      setWeatherTemp(null);
+      localStorage.removeItem("weatherCity");
+      localStorage.removeItem("weatherCache");
+      return;
+    }
+    const geo = await geocodeCity(cityName.trim());
+    if (!geo) return false;
+    const city = { name: geo.name, latitude: geo.latitude, longitude: geo.longitude };
+    setWeatherCity(city);
+    saveCity(city);
+    await refreshWeather(city);
+    return true;
+  };
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -87,6 +133,19 @@ export default function Home() {
     const savedHabits = localStorage.getItem("habits");
     if (savedHabits) {
       setHabits(JSON.parse(savedHabits));
+    }
+
+    // Load weather data
+    const savedCity = getSavedCity();
+    if (savedCity) {
+      setWeatherCity(savedCity);
+      const cached = getCachedWeather();
+      if (cached) {
+        setWeatherCode(cached.code);
+        setWeatherTemp(cached.temperature);
+      } else {
+        refreshWeather(savedCity);
+      }
     }
   }, []);
 
@@ -488,27 +547,27 @@ export default function Home() {
       // 4. Optionally update settings (ask user first)
       const settingsToUpdate = [];
       if (typeof data.darkMode === "boolean" && data.darkMode !== darkMode) {
-        settingsToUpdate.push("dark mode");
+        settingsToUpdate.push("深色模式");
       }
       if (data.theme && data.theme !== theme) {
-        settingsToUpdate.push("theme");
+        settingsToUpdate.push("主题");
       }
 
       if (settingsToUpdate.length > 0) {
         const updateSettings = confirm(
-          `Do you want to update your ${settingsToUpdate.join(
-            " and "
-          )} settings to match the imported data?`
+          `是否要更新您的${settingsToUpdate.join(
+            " 和 "
+          )}设置以匹配导入的数据？`
         );
 
         if (updateSettings) {
           if (typeof data.darkMode === "boolean") {
             setDarkMode(data.darkMode);
-            importStats.updatedSettings.push("dark mode");
+            importStats.updatedSettings.push("深色模式");
           }
           if (data.theme) {
             setTheme(data.theme);
-            importStats.updatedSettings.push("theme");
+            importStats.updatedSettings.push("主题");
           }
         }
       }
@@ -516,18 +575,18 @@ export default function Home() {
       // Show detailed import summary
       const summaryParts = [];
       if (importStats.newTasks > 0)
-        summaryParts.push(`${importStats.newTasks} new task(s)`);
+        summaryParts.push(`${importStats.newTasks} 个新任务`);
       if (importStats.updatedTasks > 0)
-        summaryParts.push(`${importStats.updatedTasks} updated task(s)`);
+        summaryParts.push(`${importStats.updatedTasks} 个更新任务`);
       if (importStats.newSubtasks > 0)
-        summaryParts.push(`${importStats.newSubtasks} new subtask(s)`);
+        summaryParts.push(`${importStats.newSubtasks} 个新子任务`);
       if (importStats.newTags > 0)
-        summaryParts.push(`${importStats.newTags} new tag(s)`);
+        summaryParts.push(`${importStats.newTags} 个新标签`);
       if (importStats.newHabits > 0)
-        summaryParts.push(`${importStats.newHabits} new habit(s)`);
+        summaryParts.push(`${importStats.newHabits} 个新习惯`);
       if (importStats.updatedSettings.length > 0)
         summaryParts.push(
-          `updated ${importStats.updatedSettings.join(" and ")}`
+          `已更新 ${importStats.updatedSettings.join(" 和 ")}`
         );
 
       const totalChanges =
@@ -539,18 +598,18 @@ export default function Home() {
 
       if (totalChanges === 0 && importStats.updatedSettings.length === 0) {
         alert(
-          "Sync completed! No new items were found - all data was already in sync."
+          "同步完成！未发现新项目——所有数据已同步。"
         );
       } else {
         const summaryMessage =
           summaryParts.length > 0
-            ? `Sync successful! Merged/Updated: ${summaryParts.join(", ")}.`
-            : "Sync completed!";
+            ? `同步成功！合并/更新：${summaryParts.join("，")}。`
+            : "同步完成！";
         alert(summaryMessage);
       }
     } catch (error) {
       console.error("Import error:", error);
-      alert("Error processing synced data. Please try again.");
+      alert("处理同步数据出错，请重试。");
     }
   };
 
@@ -929,10 +988,10 @@ export default function Home() {
             if (data.habits) setHabits(data.habits);
             if (typeof data.darkMode === "boolean") setDarkMode(data.darkMode);
             if (data.theme) setTheme(data.theme);
-            alert("Data imported successfully!");
+            alert("数据导入成功！");
             setShowSettings(false); // Close settings after import
           } catch (error) {
-            alert("Error importing data. Please check the file format.");
+            alert("导入数据出错，请检查文件格式。");
           }
         };
         reader.readAsText(file);
@@ -1031,7 +1090,7 @@ export default function Home() {
                 className="p-4 px-0 border-b border-dashed"
               >
                 <div className="flex items-center justify-between">
-                  <DayNightCycle selectedDate={selectedDate} />
+                  <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} />
                   <div className="flex items-center gap-2">
                     <div className="text-right flex flex-col">
                       <div className="text-xl font-extrabold flex items-center gap-2">
@@ -1039,7 +1098,7 @@ export default function Home() {
                           value={selectedDate.getDate()}
                           fontSize={20}
                         />
-                        {selectedDate.toLocaleDateString("en-US", {
+                        {selectedDate.toLocaleDateString("zh-CN", {
                           month: "long",
                         })}
                       </div>
@@ -1082,7 +1141,7 @@ export default function Home() {
                   >
                     <div className="group-hover:scale-110 transition-transform  flex items-center gap-2">
                       <Timer className="h-5 w-5" />
-                      <span>Timer</span>
+                      <span>计时器</span>
                     </div>
                   </Button>
 
@@ -1102,7 +1161,7 @@ export default function Home() {
                   >
                     <div className="group-hover:scale-110 transition-transform  flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
-                      <span>Habits</span>
+                      <span>习惯</span>
                     </div>
                   </Button>
                 </div>
@@ -1126,7 +1185,7 @@ export default function Home() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                       <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
-                    Prio Space
+                    优事空间 PrioSpace
                   </div>
                   <button
                     onClick={() => setShowSettings(true)}
@@ -1143,7 +1202,7 @@ export default function Home() {
                   className="p-4 border-b border-dashed px-6"
                 >
                   <div className="flex items-center justify-between">
-                    <DayNightCycle selectedDate={selectedDate} />
+                    <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} />
                     <div className="flex items-center gap-2">
                       <div className="text-right flex flex-col">
                         <div className="text-xl font-extrabold flex items-center gap-2">
@@ -1151,7 +1210,7 @@ export default function Home() {
                             value={selectedDate.getDate()}
                             fontSize={20}
                           />
-                          {selectedDate.toLocaleDateString("en-US", {
+                          {selectedDate.toLocaleDateString("zh-CN", {
                             month: "long",
                           })}
                         </div>
@@ -1182,7 +1241,7 @@ export default function Home() {
                     className="w-full h-12 bg-primary hover:bg-primary/90 group hover:scale-[1.02] transition-all duration-200 [&_svg]:size-5 rounded-2xl"
                   >
                     <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">Add Task</span>
+                    <span className="font-extrabold">添加任务</span>
                   </Button>
 
                   <Button
@@ -1192,7 +1251,7 @@ export default function Home() {
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
                   >
                     <Timer className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">Timer</span>
+                    <span className="font-extrabold">计时器</span>
                   </Button>
 
                   <Button
@@ -1202,17 +1261,17 @@ export default function Home() {
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
                   >
                     <BarChart3 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">Habits</span>
+                    <span className="font-extrabold">习惯</span>
                   </Button>
                 </div>
 
                 {/* Keyboard shortcuts hint */}
                 <div className="p-6 pt-0 text-[10px] text-muted-foreground font-extrabold space-y-1 opacity-70">
-                  <div>⌘/Ctrl + A → Add Task</div>
-                  <div>⌘/Ctrl + C → Timer</div>
-                  <div>⌘/Ctrl + H → Habits</div>
-                  <div>⌘/Ctrl + X → Settings</div>
-                  <div>Esc → Close Modal</div>
+                  <div>⌘/Ctrl + A → 添加任务</div>
+                  <div>⌘/Ctrl + C → 计时器</div>
+                  <div>⌘/Ctrl + H → 习惯</div>
+                  <div>⌘/Ctrl + X → 设置</div>
+                  <div>Esc → 关闭弹窗</div>
                 </div>
               </motion.div>
             </div>
@@ -1258,6 +1317,8 @@ export default function Home() {
                 onDeleteCustomTag={deleteCustomTag}
                 onOpenWebRTCShare={() => setShowWebRTCShare(true)}
                 onResetApp={resetApp}
+                weatherCity={weatherCity}
+                onSetWeatherCity={handleSetWeatherCity}
               />
             )}
 

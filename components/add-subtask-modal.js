@@ -231,10 +231,10 @@ export function AddSubtaskModal({
               </motion.div>
               <div>
                 <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                  Create Subtask
+                  新建子任务
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  for "{parentTask.title}"
+                  针对"{parentTask.title}"
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export function AddSubtaskModal({
             <motion.div variants={itemVariants} className="space-y-1">
               <Input
                 ref={inputRef}
-                placeholder="What needs to be done?"
+                placeholder="需要完成什么？"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) =>
@@ -272,12 +272,12 @@ export function AddSubtaskModal({
             <motion.div variants={itemVariants} className="space-y-3">
               <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
                 <Tag className="h-4 w-4" />
-                Category
+                分类
               </label>
 
               <Select value={selectedTag} onValueChange={setSelectedTag}>
                 <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
-                  <SelectValue placeholder="Choose a category (optional)" />
+                  <SelectValue placeholder="选择分类（可选）" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                   {customTags.map((tag) => (
@@ -314,7 +314,7 @@ export function AddSubtaskModal({
                   >
                     <Plus className="h-4 w-4" />
                   </motion.div>
-                  {showAddTag ? "Cancel" : "Create New Category"}
+                  {showAddTag ? "取消" : "新建分类"}
                 </Button>
               </motion.div>
             </motion.div>
@@ -331,7 +331,7 @@ export function AddSubtaskModal({
                 >
                   <motion.div variants={itemVariants}>
                     <Input
-                      placeholder="Category name"
+                      placeholder="分类名称"
                       value={newTagName}
                       onChange={(e) => setNewTagName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
@@ -341,7 +341,7 @@ export function AddSubtaskModal({
 
                   <motion.div variants={itemVariants} className="space-y-4">
                     <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                      Choose Color
+                      选择颜色
                     </label>
                     <motion.div className="flex gap-3 flex-wrap justify-center">
                       {PRESET_COLORS.map((color, index) => (
@@ -378,7 +378,7 @@ export function AddSubtaskModal({
                       className="w-full rounded-xl font-extrabold py-3"
                       disabled={!newTagName.trim()}
                     >
-                      Create Category
+                      创建分类
                     </Button>
                   </motion.div>
                 </motion.div>
@@ -407,7 +407,7 @@ export function AddSubtaskModal({
                     className="flex items-center gap-2"
                   >
                     <Plus className="h-5 w-5" />
-                    Add Subtask
+                    添加子任务
                   </motion.div>
                 </Button>
               </motion.div>
@@ -420,7 +420,7 @@ export function AddSubtaskModal({
                   onClick={onClose}
                   className="px-6 py-6 rounded-xl font-bold border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100"
                 >
-                  Cancel
+                  取消
                 </Button>
               </motion.div>
             </motion.div>

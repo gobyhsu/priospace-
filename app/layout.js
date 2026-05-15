@@ -9,13 +9,13 @@ const nunito = Nunito({
 });
 
 export const metadata = {
-  title: "PrioSpace",
-  description: "Focus on what matters.",
+  title: "优事空间 PrioSpace",
+  description: "专注于重要的事。",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body
         className={`${nunito.variable} antialiased font-nunito`}
         suppressHydrationWarning

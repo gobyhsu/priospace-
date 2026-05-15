@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useSpring } from "framer-motion";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog } from "lucide-react";
+import { getWeatherIconType } from "@/utils/weather";
 
 function AnimatedWeekday({ dayIndex, fontSize, textColor }) {
   const weekdays = [
-    { day: "Sun", width: fontSize * 1.8 },
-    { day: "Mon", width: fontSize * 2 },
-    { day: "Tue", width: fontSize * 1.65 },
-    { day: "Wed", width: fontSize * 2.2 },
-    { day: "Thu", width: fontSize * 1.8 },
-    { day: "Fri", width: fontSize * 1.2 },
-    { day: "Sat", width: fontSize * 1.6 },
+    { day: "星期日", width: fontSize * 3.5 },
+    { day: "星期一", width: fontSize * 3.5 },
+    { day: "星期二", width: fontSize * 3.5 },
+    { day: "星期三", width: fontSize * 3.5 },
+    { day: "星期四", width: fontSize * 3.5 },
+    { day: "星期五", width: fontSize * 3.5 },
+    { day: "星期六", width: fontSize * 3.5 },
   ];
 
   const height = fontSize * 1.2;
@@ -99,7 +100,7 @@ export function AnimatedNumber({ value, fontSize, textColor }) {
   );
 }
 
-export function DayNightCycle({ selectedDate }) {
+export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
   const [isDay, setIsDay] = useState(true);
 
   useEffect(() => {
@@ -114,6 +115,40 @@ export function DayNightCycle({ selectedDate }) {
 
   const dayIndex = selectedDate.getDay();
 
+  const getWeatherIcon = () => {
+    if (weatherCode === undefined || weatherCode === null) {
+      return isDay ? (
+        <Sun className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
+      ) : (
+        <Moon className="h-8 w-8 text-blue-500 fill-blue-500/20" />
+      );
+    }
+    const type = getWeatherIconType(weatherCode);
+    const iconClass = "h-8 w-8";
+    switch (type) {
+      case "clear":
+        return isDay ? (
+          <Sun className={`${iconClass} text-yellow-500 fill-yellow-500/20`} />
+        ) : (
+          <Moon className={`${iconClass} text-blue-500 fill-blue-500/20`} />
+        );
+      case "partly-cloudy":
+        return <Cloud className={`${iconClass} text-gray-400`} />;
+      case "fog":
+        return <CloudFog className={`${iconClass} text-gray-400`} />;
+      case "drizzle":
+        return <CloudDrizzle className={`${iconClass} text-blue-400`} />;
+      case "rain":
+        return <CloudRain className={`${iconClass} text-blue-500`} />;
+      case "snow":
+        return <CloudSnow className={`${iconClass} text-blue-200`} />;
+      case "thunderstorm":
+        return <CloudLightning className={`${iconClass} text-yellow-500`} />;
+      default:
+        return <Cloud className={`${iconClass} text-gray-400`} />;
+    }
+  };
+
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-3">
@@ -124,7 +159,7 @@ export function DayNightCycle({ selectedDate }) {
         <AnimatePresence mode="wait">
           {isToday(selectedDate) && (
             <motion.div
-              key={isDay ? "sun" : "moon"}
+              key={weatherCode ?? (isDay ? "sun" : "moon")}
               initial={{ y: 20, opacity: 0, rotate: -45 }}
               animate={{ y: 0, opacity: 1, rotate: 0 }}
               exit={{ y: -20, opacity: 0, rotate: 45 }}
@@ -135,10 +170,11 @@ export function DayNightCycle({ selectedDate }) {
               }}
               className="flex items-center justify-center"
             >
-              {isDay ? (
-                <Sun className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
-              ) : (
-                <Moon className="h-8 w-8 text-blue-500 fill-blue-500/20" />
+              {getWeatherIcon()}
+              {temperature !== undefined && temperature !== null && (
+                <span className="text-sm font-bold ml-1 text-gray-500 dark:text-gray-400">
+                  {Math.round(temperature)}°
+                </span>
               )}
             </motion.div>
           )}

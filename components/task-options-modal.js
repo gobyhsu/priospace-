@@ -133,9 +133,9 @@ export function TaskOptionsModal({
     nextWeek.setDate(nextWeek.getDate() + 7);
 
     return [
-      { label: "Today", date: today },
-      { label: "Tomorrow", date: tomorrow },
-      { label: "Next Week", date: nextWeek },
+      { label: "今天", date: today },
+      { label: "明天", date: tomorrow },
+      { label: "下周", date: nextWeek },
     ];
   };
 
@@ -370,11 +370,11 @@ export function TaskOptionsModal({
               </motion.div>
               <div>
                 <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                  Options
+                  选项
                 </h2>
                 {isSubtask && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    Subtask
+                    子任务
                   </p>
                 )}
               </div>
@@ -444,7 +444,7 @@ export function TaskOptionsModal({
             {selectedTag && selectedTag !== "no-tag" && (
               <motion.div variants={itemVariants} className="space-y-3">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                  Current Category
+                  当前分类
                 </label>
                 <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/80 rounded-xl border-2 border-gray-200 dark:border-gray-700">
                   <motion.div
@@ -467,7 +467,7 @@ export function TaskOptionsModal({
               <motion.div variants={itemVariants} className="space-y-3">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Reschedule
+                  重新安排
                 </label>
 
                 <div className="flex gap-2 flex-wrap">
@@ -505,7 +505,7 @@ export function TaskOptionsModal({
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
                     <List className="h-4 w-4" />
-                    Subtasks ({subtasks.length})
+                    子任务 ({subtasks.length})
                   </label>
                   <Button
                     variant="ghost"
@@ -562,7 +562,7 @@ export function TaskOptionsModal({
                       ) : (
                         <div className="p-4 bg-gray-50 dark:bg-gray-800/80 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-center">
                           <p className="text-gray-500 dark:text-gray-400 font-medium">
-                            No subtasks yet
+                            还没有子任务
                           </p>
                         </div>
                       )}
@@ -577,7 +577,7 @@ export function TaskOptionsModal({
                           className="w-full border-2 border-gray-300 font-extrabold hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100 rounded-xl py-3"
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Add Subtask
+                          添加子任务
                         </Button>
                       </motion.div>
                     </motion.div>
@@ -590,19 +590,19 @@ export function TaskOptionsModal({
             <motion.div variants={itemVariants} className="space-y-3">
               <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
                 <Tag className="h-4 w-4" />
-                Change Category
+                更改分类
               </label>
 
               <Select value={selectedTag} onValueChange={handleTagChange}>
                 <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
-                  <SelectValue placeholder="Select a category" />
+                  <SelectValue placeholder="选择分类" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                   <SelectItem
                     value="no-tag"
                     className="rounded-lg dark:hover:bg-gray-700 dark:text-gray-100"
                   >
-                    <span className="font-extrabold">No category</span>
+                    <span className="font-extrabold">无分类</span>
                   </SelectItem>
                   {customTags.map((tag) => (
                     <SelectItem
@@ -638,7 +638,7 @@ export function TaskOptionsModal({
                   >
                     <Plus className="h-4 w-4" />
                   </motion.div>
-                  {showAddTag ? "Cancel" : "Create New Category"}
+                  {showAddTag ? "取消" : "新建分类"}
                 </Button>
               </motion.div>
             </motion.div>
@@ -655,7 +655,7 @@ export function TaskOptionsModal({
                 >
                   <motion.div variants={itemVariants}>
                     <Input
-                      placeholder="Category name"
+                      placeholder="分类名称"
                       value={newTagName}
                       onChange={(e) => setNewTagName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
@@ -665,7 +665,7 @@ export function TaskOptionsModal({
 
                   <motion.div variants={itemVariants} className="space-y-4">
                     <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                      Choose Color
+                      选择颜色
                     </label>
                     <motion.div
                       className="flex gap-3 flex-wrap justify-center"
@@ -718,7 +718,7 @@ export function TaskOptionsModal({
                         className="w-full rounded-xl font-extrabold py-3"
                         disabled={!newTagName.trim()}
                       >
-                        Create Category
+                        创建分类
                       </Button>
                     </motion.div>
                   </motion.div>
@@ -742,7 +742,7 @@ export function TaskOptionsModal({
                   }`}
                 >
                   <Check className="h-5 w-5 mr-2" />
-                  {task.completed ? "Mark Incomplete" : "Mark Complete"}
+                  {task.completed ? "标记未完成" : "标记完成"}
                 </Button>
               </motion.div>
 
@@ -753,7 +753,7 @@ export function TaskOptionsModal({
                   variant="outline"
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
-                  Transfer to Today
+                  转移到今天
                 </Button>
               )}
 
@@ -769,7 +769,7 @@ export function TaskOptionsModal({
                     className="w-full rounded-xl font-extrabold py-4 text-lg shadow-lg"
                   >
                     <Trash2 className="h-5 w-5 mr-2" />
-                    Delete {isSubtask ? "Subtask" : "Task"}
+                    删除{isSubtask ? "子任务" : "任务"}
                   </Button>
                 </motion.div>
               )}
