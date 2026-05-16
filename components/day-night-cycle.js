@@ -157,7 +157,7 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
         </div>
 
         <AnimatePresence mode="wait">
-          {isToday(selectedDate) && (
+          {getWeatherIcon() && (
             <motion.div
               key={weatherCode ?? (isDay ? "sun" : "moon")}
               initial={{ y: 20, opacity: 0, rotate: -45 }}

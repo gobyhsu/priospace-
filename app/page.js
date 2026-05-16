@@ -18,11 +18,13 @@ import { IntroScreen } from "@/components/intro-screen";
 import { WebRTCShareModal } from "@/components/webrtc-share-modal";
 import {
   geocodeCity,
+  reverseGeocode,
   fetchWeather,
   getCachedWeather,
   setCachedWeather,
   getSavedCity,
   saveCity,
+  getCurrentPosition,
 } from "@/utils/weather";
 
 export default function Home() {
@@ -48,15 +50,14 @@ export default function Home() {
 
   // Fetch weather data
   const refreshWeather = async (city) => {
-    if (!city) return;
+    if (!city || !city.adcode) return;
     try {
-      const weather = await fetchWeather(city.latitude, city.longitude);
-      setWeatherCode(weather.code);
+      const weather = await fetchWeather(city.adcode);
+      setWeatherCode(weather.weather);
       setWeatherTemp(weather.temperature);
       setCachedWeather({
-        code: weather.code,
+        weather: weather.weather,
         temperature: weather.temperature,
-        cityName: city.name,
       });
     } catch (e) {
       console.log("Weather fetch failed:", e);
@@ -64,21 +65,29 @@ export default function Home() {
   };
 
   const handleSetWeatherCity = async (cityName) => {
-    if (!cityName.trim()) {
-      setWeatherCity(null);
-      setWeatherCode(null);
-      setWeatherTemp(null);
-      localStorage.removeItem("weatherCity");
-      localStorage.removeItem("weatherCache");
-      return;
+    if (!cityName || !cityName.trim()) {
+      autoDetectWeather();
+      return true;
     }
-    const geo = await geocodeCity(cityName.trim());
-    if (!geo) return false;
-    const city = { name: geo.name, latitude: geo.latitude, longitude: geo.longitude };
+    const city = await geocodeCity(cityName.trim());
+    if (!city) return false;
     setWeatherCity(city);
     saveCity(city);
     await refreshWeather(city);
     return true;
+  };
+
+  const autoDetectWeather = async () => {
+    try {
+      const pos = await getCurrentPosition();
+      const city = await reverseGeocode(pos.latitude, pos.longitude);
+      if (!city) return;
+      setWeatherCity(city);
+      saveCity(city);
+      await refreshWeather(city);
+    } catch (e) {
+      console.log("Auto location failed:", e);
+    }
   };
 
   // Load data from localStorage on mount
@@ -141,11 +150,12 @@ export default function Home() {
       setWeatherCity(savedCity);
       const cached = getCachedWeather();
       if (cached) {
-        setWeatherCode(cached.code);
+        setWeatherCode(cached.weather);
         setWeatherTemp(cached.temperature);
-      } else {
-        refreshWeather(savedCity);
       }
+      refreshWeather(savedCity);
+    } else {
+      autoDetectWeather();
     }
   }, []);
 
@@ -687,11 +697,16 @@ export default function Home() {
       setHabits(updatedHabits);
     } else {
       // Handle regular task/subtask completion
-      const updatedTasks = updateTaskInList(
-        id,
-        { completed: !task.completed },
-        currentTasks
-      );
+      const newCompleted = !task.completed;
+      const updates = { completed: newCompleted };
+      // If toggling a parent task, also toggle all its subtasks
+      if (task.subtasks && task.subtasks.length > 0) {
+        updates.subtasks = task.subtasks.map((st) => ({
+          ...st,
+          completed: newCompleted,
+        }));
+      }
+      const updatedTasks = updateTaskInList(id, updates, currentTasks);
       setDailyTasks({ ...dailyTasks, [dateString]: updatedTasks });
     }
   };
@@ -1032,6 +1047,26 @@ export default function Home() {
     );
   };
 
+  const addHabit = (name, tag) => {
+    const newHabit = {
+      id: Date.now().toString(),
+      name,
+      completedDates: [],
+      tag: tag || "",
+    };
+    setHabits((prev) => [...prev, newHabit]);
+  };
+
+  const deleteHabit = (habitId) => {
+    setHabits((prev) => prev.filter((h) => h.id !== habitId));
+  };
+
+  const updateHabit = (habitId, updates) => {
+    setHabits((prev) =>
+      prev.map((h) => (h.id === habitId ? { ...h, ...updates } : h))
+    );
+  };
+
   const resetApp = () => {
     localStorage.clear();
     setDailyTasks({});
@@ -1315,6 +1350,11 @@ export default function Home() {
                 customTags={customTags}
                 onUpdateCustomTag={updateCustomTag}
                 onDeleteCustomTag={deleteCustomTag}
+                onAddCustomTag={addCustomTag}
+                habits={habits}
+                onAddHabit={addHabit}
+                onDeleteHabit={deleteHabit}
+                onUpdateHabit={updateHabit}
                 onOpenWebRTCShare={() => setShowWebRTCShare(true)}
                 onResetApp={resetApp}
                 weatherCity={weatherCity}

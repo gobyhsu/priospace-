@@ -15,7 +15,7 @@
 
 A beautiful, modern productivity app that combines task management with Pomodoro timer functionality, habit tracking, and real-time collaboration. Built with Next.js, React, and Framer Motion for smooth animations and premium user experience.
 
-![Version](https://img.shields.io/badge/Version-1.3.0--zh--CN-green)
+![Version](https://img.shields.io/badge/Version-1.3.1--zh--CN-green)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)

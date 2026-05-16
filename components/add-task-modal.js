@@ -307,7 +307,7 @@ export function AddTaskModal({
                 <Plus className="h-5 w-5 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                新建
+                新建任务
               </h2>
             </div>
             <Button

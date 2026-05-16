@@ -19,6 +19,8 @@ import {
   Save,
   Tag,
   AlertTriangle,
+  MapPin,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +38,11 @@ export function SettingsModal({
   customTags,
   onUpdateCustomTag,
   onDeleteCustomTag,
+  onAddCustomTag,
+  habits,
+  onAddHabit,
+  onDeleteHabit,
+  onUpdateHabit,
   onResetApp,
   weatherCity,
   onSetWeatherCity,
@@ -44,6 +51,12 @@ export function SettingsModal({
   const [weatherInput, setWeatherInput] = useState(weatherCity?.name || "");
   const [weatherSaving, setWeatherSaving] = useState(false);
   const [editName, setEditName] = useState("");
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState("#3b82f6");
+  const [editingHabitId, setEditingHabitId] = useState(null);
+  const [editHabitName, setEditHabitName] = useState("");
+  const [newHabitName, setNewHabitName] = useState("");
+  const [newHabitTagId, setNewHabitTagId] = useState("");
   const modalRef = useRef(null);
 
   const startEditing = (tag) => {
@@ -54,6 +67,16 @@ export function SettingsModal({
   const saveTag = (id) => {
     onUpdateCustomTag(id, { name: editName });
     setEditingTagId(null);
+  };
+
+  const startEditingHabit = (habit) => {
+    setEditingHabitId(habit.id);
+    setEditHabitName(habit.name);
+  };
+
+  const saveHabit = (id) => {
+    onUpdateHabit(id, { name: editHabitName });
+    setEditingHabitId(null);
   };
 
   const themes = [
@@ -461,11 +484,21 @@ export function SettingsModal({
                       天气
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      设置城市以显示当地天气
+                      自动定位或手动输入城市
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={() => onSetWeatherCity("")}
+                      variant="outline"
+                      size="sm"
+                      className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-10 p-0"
+                    >
+                      <MapPin className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
                   <Input
                     placeholder="输入城市名称，如：北京"
                     value={weatherInput}
@@ -483,7 +516,7 @@ export function SettingsModal({
                 </div>
                 {weatherCity && (
                   <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    当前城市：{weatherCity.name}
+                    当前：{weatherCity.name}
                   </div>
                 )}
               </div>
@@ -575,10 +608,188 @@ export function SettingsModal({
                     </div>
                   ))
                 )}
+
+                {/* New tag form */}
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t-2 border-gray-200 dark:border-gray-700">
+                  <input
+                    type="color"
+                    value={newTagColor}
+                    onChange={(e) => setNewTagColor(e.target.value)}
+                    className="w-6 h-6 min-w-6 min-h-6 rounded-md cursor-pointer bg-transparent border-0"
+                  />
+                  <Input
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                    placeholder="新分类名称"
+                    className="h-8 py-0 font-bold"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newTagName.trim()) {
+                        onAddCustomTag(newTagName.trim(), newTagColor);
+                        setNewTagName("");
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={!newTagName.trim()}
+                    onClick={() => {
+                      onAddCustomTag(newTagName.trim(), newTagColor);
+                      setNewTagName("");
+                    }}
+                    className="text-primary h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    +
+                  </Button>
+                </div>
               </div>
             </motion.div>
 
-            {/* WebRTC Share */}
+            {/* Habit Management */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80"
+            >
+              <div className="flex items-center gap-3">
+                <RefreshCw className="h-5 w-5 text-primary" />
+                <div>
+                  <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                    管理习惯
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                    编辑或删除习惯
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-h-60 overflow-y-auto hide-scroll flex flex-col gap-1">
+                {habits.length === 0 ? (
+                  <p className="text-sm text-gray-500 italic p-4 text-center">
+                    还没有创建习惯。
+                  </p>
+                ) : (
+                  habits.map((habit) => (
+                    <div
+                      key={habit.id}
+                      className="flex items-center justify-between p-3 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="text-base">🔁</span>
+                        {editingHabitId === habit.id ? (
+                          <Input
+                            value={editHabitName}
+                            onChange={(e) => setEditHabitName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveHabit(habit.id);
+                            }}
+                            className="h-8 py-0 mr-3 font-bold"
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="font-bold text-gray-700 dark:text-gray-200">
+                            {habit.name.length > 12
+                              ? habit.name.slice(0, 12) + "..."
+                              : habit.name}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {editingHabitId === habit.id ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => saveHabit(habit.id)}
+                            className="text-green-500 h-8 w-8 p-0"
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditingHabit(habit)}
+                            className="text-gray-400 h-8 w-8 p-0"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDeleteHabit(habit.id)}
+                          className="text-red-400 hover:text-red-500 h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+
+                {/* New habit form */}
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t-2 border-gray-200 dark:border-gray-700">
+                  <Input
+                    value={newHabitName}
+                    onChange={(e) => setNewHabitName(e.target.value)}
+                    placeholder="新习惯名称"
+                    className="h-8 py-0 font-bold"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newHabitName.trim()) {
+                        onAddHabit(newHabitName.trim(), newHabitTagId);
+                        setNewHabitName("");
+                        setNewHabitTagId("");
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={!newHabitName.trim()}
+                    onClick={() => {
+                      onAddHabit(newHabitName.trim(), newHabitTagId);
+                      setNewHabitName("");
+                      setNewHabitTagId("");
+                    }}
+                    className="text-primary h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    +
+                  </Button>
+                </div>
+                {customTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <button
+                      onClick={() => setNewHabitTagId("")}
+                      className={`px-3 py-1 rounded-full text-xs font-bold border-2 transition-all ${
+                        newHabitTagId === ""
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-gray-200 dark:border-gray-700 text-gray-500"
+                      }`}
+                    >
+                      无分类
+                    </button>
+                    {customTags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        onClick={() => setNewHabitTagId(tag.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border-2 transition-all ${
+                          newHabitTagId === tag.id
+                            ? "border-primary bg-primary/10"
+                            : "border-gray-200 dark:border-gray-700 text-gray-500"
+                        }`}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
             <motion.div variants={itemVariants}>
               <div className="flex items-center justify-between p-4 rounded-xl border-2 border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-800/20">
                 <div className="flex items-center gap-3">
@@ -673,7 +884,7 @@ export function SettingsModal({
             >
               <div className="text-center space-y-3">
                 <div className="text-lg font-extrabold text-primary">
-                  优事空间 PrioSpace V1.3.0-zh-CN
+                  优事空间 PrioSpace V1.3.1-zh-CN
                 </div>
                 <div className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   专注 · 追踪 · 成就
