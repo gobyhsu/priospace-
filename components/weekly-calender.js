@@ -5,9 +5,25 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function WeeklyCalendar({ selectedDate, onDateSelect }) {
+export function WeeklyCalendar({ selectedDate, onDateSelect, dailyTasks }) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const scrollRef = useRef(null);
+
+  const getDateString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getTaskStatus = (date) => {
+    const dateStr = getDateString(date);
+    const tasks = dailyTasks?.[dateStr] || [];
+    const nonHabitTasks = tasks.filter((t) => !t.isHabit);
+    if (nonHabitTasks.length === 0) return "none";
+    const allDone = nonHabitTasks.every((t) => t.completed);
+    return allDone ? "done" : "pending";
+  };
 
   const getWeekDates = (weekOffset = 0) => {
     const today = new Date();
@@ -66,6 +82,14 @@ export function WeeklyCalendar({ selectedDate, onDateSelect }) {
               <span className="text-lg font-extrabold">{date.getDate()}</span>
               <span className="text-xs font-semibold">
                 {date.toLocaleDateString("zh-CN", { month: "short" })}
+              </span>
+              <span className="h-1.5 flex items-center justify-center">
+                {getTaskStatus(date) === "done" && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                )}
+                {getTaskStatus(date) === "pending" && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                )}
               </span>
             </motion.button>
           ))}

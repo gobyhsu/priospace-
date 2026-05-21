@@ -6,7 +6,7 @@ import { DayNightCycle, AnimatedNumber } from "@/components/day-night-cycle";
 import { AnimatedYear } from "@/components/animated-year";
 import { WeeklyCalendar } from "@/components/weekly-calender";
 import { TaskList } from "@/components/task-list";
-import { Timer, Plus, BarChart3, Settings, CheckCircle } from "lucide-react";
+import { Timer, Plus, BarChart3, Settings, CheckCircle, AlertCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { TaskOptionsModal } from "@/components/task-options-modal";
@@ -39,6 +39,7 @@ export default function Home() {
   const [showTaskOptions, setShowTaskOptions] = useState(false);
   const [showAddSubtask, setShowAddSubtask] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showIncompletePanel, setShowIncompletePanel] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showIntroScreen, setShowIntroScreen] = useState(true);
@@ -1093,6 +1094,18 @@ export default function Home() {
   const allTasks = [...regularTasks, ...dailyHabitTasks];
   const flatTaskList = createFlatTaskList(allTasks); // For timer and other components
 
+  // Compute past incomplete tasks (excluding today, excluding habits)
+  const todayStr = getDateString(new Date());
+  const pastIncomplete = [];
+  Object.keys(dailyTasks).sort().forEach((dateStr) => {
+    if (dateStr >= todayStr) return;
+    const tasks = dailyTasks[dateStr] || [];
+    const incomplete = tasks.filter((t) => !t.completed);
+    if (incomplete.length > 0) {
+      pastIncomplete.push({ date: dateStr, tasks: incomplete });
+    }
+  });
+
   return (
     <>
       <AnimatePresence>
@@ -1152,8 +1165,73 @@ export default function Home() {
                 <WeeklyCalendar
                   selectedDate={selectedDate}
                   onDateSelect={setSelectedDate}
-                />
-              </div>
+                  dailyTasks={dailyTasks}
+                />              </div>
+
+              {/* Past incomplete tasks banner */}
+              {pastIncomplete.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border-b border-dashed"
+                >
+                  <button
+                    onClick={() => setShowIncompletePanel(!showIncompletePanel)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                        有 {pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0)} 项历史未完成
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-orange-400 transition-transform ${showIncompletePanel ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {showIncompletePanel && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden max-h-[40vh] overflow-y-auto"
+                      >
+                        {pastIncomplete.map(({ date, tasks }) => (
+                          <div key={date} className="border-b border-dashed last:border-b-0">
+                            <div className="px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50">
+                              <button
+                                onClick={() => {
+                                  const d = new Date(date + "T00:00:00");
+                                  setSelectedDate(d);
+                                  setShowIncompletePanel(false);
+                                }}
+                                className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+                              >
+                                {new Date(date + "T00:00:00").toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })} ›
+                              </button>
+                            </div>
+                            {tasks.map((task) => (
+                              <div key={task.id} className="flex items-center gap-3 px-4 py-2">
+                                <button
+                                  onClick={() => toggleTask(task.id)}
+                                  className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                    task.completed
+                                      ? "bg-primary border-primary"
+                                      : "border-primary/50 hover:border-primary hover:bg-primary/10 border-dotted"
+                                  }`}
+                                >
+                                  {task.completed && <CheckCircle className="h-3 w-3 text-primary-foreground" />}
+                                </button>
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{task.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
 
               <div className="flex-1 overflow-hidden">
                 <TaskList
@@ -1265,8 +1343,69 @@ export default function Home() {
                   <WeeklyCalendar
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
+                    dailyTasks={dailyTasks}
                   />
                 </div>
+
+                {/* Past incomplete tasks (desktop sidebar) */}
+                {pastIncomplete.length > 0 && (
+                  <div className="border-b border-dashed">
+                    <button
+                      onClick={() => setShowIncompletePanel(!showIncompletePanel)}
+                      className="w-full flex items-center justify-between px-6 py-2.5 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-orange-500" />
+                        <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                          有 {pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0)} 项历史未完成
+                        </span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-orange-400 transition-transform ${showIncompletePanel ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                      {showIncompletePanel && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden max-h-[40vh] overflow-y-auto"
+                        >
+                          {pastIncomplete.map(({ date, tasks }) => (
+                            <div key={date} className="border-b border-dashed last:border-b-0">
+                              <div className="px-6 py-1.5 bg-gray-50 dark:bg-gray-800/50">
+                                <button
+                                  onClick={() => {
+                                    const d = new Date(date + "T00:00:00");
+                                    setSelectedDate(d);
+                                    setShowIncompletePanel(false);
+                                  }}
+                                  className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+                                >
+                                  {new Date(date + "T00:00:00").toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })} ›
+                                </button>
+                              </div>
+                              {tasks.map((task) => (
+                                <div key={task.id} className="flex items-center gap-3 px-6 py-2">
+                                  <button
+                                    onClick={() => toggleTask(task.id)}
+                                    className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                      task.completed
+                                        ? "bg-primary border-primary"
+                                        : "border-primary/50 hover:border-primary hover:bg-primary/10 border-dotted"
+                                    }`}
+                                  >
+                                    {task.completed && <CheckCircle className="h-3 w-3 text-primary-foreground" />}
+                                  </button>
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{task.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
 
                 {/* Desktop Action Buttons */}
                 <div className="p-6 space-y-4 flex-1">
