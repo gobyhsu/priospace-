@@ -4,10 +4,14 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 export function WeeklyCalendar({ selectedDate, onDateSelect, dailyTasks }) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const scrollRef = useRef(null);
+  const { t } = useTranslation();
+  const locale = i18n.language === "zh-TW" ? "zh-TW" : i18n.language;
 
   const getDateString = (date) => {
     const year = date.getFullYear();
@@ -77,11 +81,11 @@ export function WeeklyCalendar({ selectedDate, onDateSelect, dailyTasks }) {
               }`}
             >
               <span className="text-xs font-semibold">
-                {date.toLocaleDateString("zh-CN", { weekday: "short" })}
+                {date.toLocaleDateString(locale, { weekday: "short" })}
               </span>
               <span className="text-lg font-extrabold">{date.getDate()}</span>
               <span className="text-xs font-semibold">
-                {date.toLocaleDateString("zh-CN", { month: "short" })}
+                {date.toLocaleDateString(locale, { month: "short" })}
               </span>
               <span className="h-1.5 flex items-center justify-center">
                 {getTaskStatus(date) === "done" && (

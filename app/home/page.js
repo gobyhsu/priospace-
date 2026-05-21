@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,6 +62,7 @@ const staggerContainer = {
 };
 
 export default function LandingPage() {
+  const { t } = useTranslation();
   const handleStartWebApp = () => {
     window.location.href = "/";
   };
@@ -112,14 +115,14 @@ export default function LandingPage() {
               variants={fadeInUp}
               className="font-heading text-3xl font-extrabold flex flex-col items-center gap-4"
             >
-              优事空间 PrioSpace
+              PrioSpace
             </motion.h1>
 
             <motion.p
               variants={fadeInUp}
               className="max-w-[50rem] text-muted-foreground text-4xl sm:text-6xl leading-20 font-extrabold"
             >
-              一款精美、现代的生产力应用，集成了强大的任务管理、番茄计时器、习惯追踪和任务协作功能。
+              {t('home.hero')}
             </motion.p>
 
             <motion.div
@@ -138,7 +141,7 @@ export default function LandingPage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Play className="h-4 w-4" />
-                  网页
+                  {t('home.web')}
                 </motion.button>
               </Button>
 
@@ -252,11 +255,11 @@ export default function LandingPage() {
               <CardContent className="flex flex-col items-center gap-4 p-6 sm:p-12 text-slate-50">
                 <div className="flex items-center gap-2">
                   <Github className="h-6 w-6 opacity-80" />
-                  <h2 className="text-lg font-extrabold">开源且免费</h2>
+                  <h2 className="text-lg font-extrabold">{t('home.openSource')}</h2>
                 </div>
                 <div className="space-y-4">
                   <p className="max-w-[46rem] opacity-90 text-4xl font-extrabold leading-[2.7rem]">
-                    优事空间 PrioSpace 是完全开源的。给仓库加星标、为项目贡献代码，或者 fork 它来定制你自己的版本。
+                    {t('home.openSourceDesc')}
                   </p>
                 </div>
                 <Button
@@ -271,7 +274,7 @@ export default function LandingPage() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Star className="h-6 w-6 animate-pulse" />
-                    在 GitHub 上星标
+                    {t('home.starGitHub')}
                   </motion.button>
                 </Button>
               </CardContent>
@@ -312,7 +315,7 @@ export default function LandingPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Coffee className="h-6 w-6 animate-pulse" />
-                请我喝咖啡
+                {t('home.buyMeCoffee')}
               </motion.button>
             </Button>
           </div>

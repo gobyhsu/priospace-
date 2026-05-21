@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 export function WebRTCShareModal({
   onClose,
@@ -30,6 +31,7 @@ export function WebRTCShareModal({
   theme,
   onImportData,
 }) {
+  const { t } = useTranslation();
   // State management
   const [isHost, setIsHost] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -101,7 +103,7 @@ export function WebRTCShareModal({
 
         const connectionTimeout = setTimeout(() => {
           setStatus("error");
-          setErrorMessage("连接超时，服务器可能不可用。");
+          setErrorMessage(t('sync.timeoutError'));
           setConnectionState("disconnected");
           reject(new Error("Connection timeout"));
         }, 10000); // 10 second timeout
@@ -132,7 +134,7 @@ export function WebRTCShareModal({
             if (event.code !== 1000) {
               // 1000 is normal closure
               setStatus("error");
-              setErrorMessage("与信令服务器失去连接");
+              setErrorMessage(t('sync.lostConnection'));
             }
           }
         };
@@ -142,15 +144,13 @@ export function WebRTCShareModal({
           clearTimeout(connectionTimeout);
           setConnectionState("disconnected");
           setStatus("error");
-          setErrorMessage(
-            "无法连接信令服务器，请检查服务器地址后重试。"
-          );
+          setErrorMessage(t('sync.cannotConnect'));
           reject(error);
         };
       } catch (error) {
         setConnectionState("disconnected");
         setStatus("error");
-        setErrorMessage("无法连接信令服务器");
+        setErrorMessage(t('sync.cannotConnectShort'));
         reject(error);
       }
     });
@@ -256,7 +256,7 @@ export function WebRTCShareModal({
         pc.connectionState === "disconnected"
       ) {
         setStatus("error");
-        setErrorMessage("P2P 连接失败");
+        setErrorMessage(t('sync.p2pFailed'));
       }
     };
 
@@ -288,14 +288,14 @@ export function WebRTCShareModal({
     } catch (error) {
       console.error("Error starting host:", error);
       setStatus("error");
-      setErrorMessage("创建房间失败，请重试。");
+      setErrorMessage(t('sync.createFailed'));
     }
   };
 
   const joinRoom = async (inputRoomId) => {
     try {
       if (!inputRoomId?.trim()) {
-        setErrorMessage("请输入房间号");
+        setErrorMessage(t('sync.enterRoomId'));
         return;
       }
 
@@ -320,7 +320,7 @@ export function WebRTCShareModal({
     } catch (error) {
       console.error("Error joining room:", error);
       setStatus("error");
-      setErrorMessage("加入房间失败，请检查房间号后重试。");
+      setErrorMessage(t('sync.joinFailed'));
     }
   };
 
@@ -359,7 +359,7 @@ export function WebRTCShareModal({
       dataChannel.onerror = (error) => {
         console.error("Data channel error:", error);
         setStatus("error");
-        setErrorMessage("发送数据失败");
+        setErrorMessage(t('sync.sendFailed'));
       };
 
       dataChannelRef.current = dataChannel;
@@ -377,7 +377,7 @@ export function WebRTCShareModal({
     } catch (error) {
       console.error("Error sending data:", error);
       setStatus("error");
-      setErrorMessage("发送数据失败");
+      setErrorMessage(t('sync.sendFailed'));
     }
   };
 
@@ -418,7 +418,7 @@ export function WebRTCShareModal({
     } catch (error) {
       console.error("Error handling offer:", error);
       setStatus("error");
-      setErrorMessage("处理连接失败");
+      setErrorMessage(t('sync.handleFailed'));
     }
   };
 
@@ -627,7 +627,7 @@ export function WebRTCShareModal({
                 <Share className="h-5 w-5 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                同步任务
+                {t('sync.title')}
               </h2>
             </div>
             <Button
@@ -645,7 +645,7 @@ export function WebRTCShareModal({
             <div className="flex items-center justify-between">
               <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
                 <Server className="h-4 w-4" />
-                服务器地址
+                {t('sync.serverAddress')}
               </label>
               <Button
                 variant="ghost"
@@ -672,7 +672,7 @@ export function WebRTCShareModal({
                     className="border-2 border-gray-300 font-medium focus:border-primary/70 dark:border-gray-600 dark:focus:border-primary/80 dark:text-gray-100 rounded-xl bg-white dark:bg-gray-800 py-3"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
-                    输入你的 WebRTC 信令服务器地址
+                    {t('sync.serverHint')}
                   </p>
                 </motion.div>
               )}
@@ -704,11 +704,11 @@ export function WebRTCShareModal({
 
                 <div className="flex-1">
                   <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                    {status === "hosting" && `房间已创建：${roomId}`}
-                    {status === "connecting" && "连接中..."}
-                    {status === "connected" && "已连接！"}
-                    {status === "shared" && "任务已分享！"}
-                    {status === "error" && "连接错误"}
+                    {status === "hosting" && t('sync.roomCreated', { id: roomId })}
+                    {status === "connecting" && t('sync.connecting')}
+                    {status === "connected" && t('sync.connected')}
+                    {status === "shared" && t('sync.shared')}
+                    {status === "error" && t('sync.connectionError')}
                   </div>
                   {errorMessage && (
                     <div className="text-sm text-red-500 font-medium">
@@ -732,12 +732,12 @@ export function WebRTCShareModal({
                       {copySuccess ? (
                         <>
                           <Check className="h-4 w-4 mr-1" />
-                          已复制！
+                          {t('common.copied')}
                         </>
                       ) : (
                         <>
                           <Copy className="h-4 w-4 mr-1" />
-                          复制
+                          {t('common.copy')}
                         </>
                       )}
                     </Button>
@@ -755,7 +755,7 @@ export function WebRTCShareModal({
                       size="sm"
                       className="bg-primary hover:bg-primary/90 rounded-xl font-extrabold"
                     >
-                      关闭
+                      {t('common.close')}
                     </Button>
                   </motion.div>
                 )}
@@ -773,7 +773,7 @@ export function WebRTCShareModal({
                 <div className="flex items-center gap-2">
                   <Download className="h-5 w-5 text-green-600" />
                   <span className="font-extrabold text-green-700 dark:text-green-300">
-                    数据已接收！
+                    {t('sync.dataReceived')}
                   </span>
                 </div>
                 <Button
@@ -799,14 +799,13 @@ export function WebRTCShareModal({
                     className="text-sm text-green-600 dark:text-green-400 mb-3 font-mono bg-white dark:bg-gray-800 p-3 rounded-xl border border-green-200 dark:border-green-700 max-h-32 overflow-y-auto"
                   >
                     <div>
-                      任务：{Object.keys(receivedData.dailyTasks || {}).length}{" "}
-                      天
+                      {t('sync.taskCount', { count: Object.keys(receivedData.dailyTasks || {}).length })}
                     </div>
                     <div>
-                      自定义标签：{(receivedData.customTags || []).length}
+                      {t('sync.tagCount', { count: (receivedData.customTags || []).length })}
                     </div>
-                    <div>习惯：{(receivedData.habits || []).length}</div>
-                    <div>主题：{receivedData.theme || "default"}</div>
+                    <div>{t('sync.habitCount', { count: (receivedData.habits || []).length })}</div>
+                    <div>{t('sync.themeLabel', { theme: receivedData.theme || "default" })}</div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -820,7 +819,7 @@ export function WebRTCShareModal({
                   className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-extrabold py-3"
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  导入此数据
+                  {t('sync.importThisData')}
                 </Button>
               </motion.div>
             </motion.div>
@@ -836,10 +835,10 @@ export function WebRTCShareModal({
                     <Wifi className="h-5 w-5 text-primary" />
                     <div>
                       <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                        创建房间
+                        {t('sync.createRoom')}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                        与他人分享你的任务
+                        {t('sync.shareTasks')}
                       </div>
                     </div>
                   </div>
@@ -864,19 +863,19 @@ export function WebRTCShareModal({
                 variants={itemVariants}
                 className="text-center text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider text-sm"
               >
-                或
+                {t('common.or')}
               </motion.div>
 
               {/* Join Option */}
               <motion.div variants={itemVariants} className="space-y-3">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                  加入房间
+                  {t('sync.joinRoom')}
                 </label>
 
                 <div className="flex gap-2">
                   <Input
                     type="text"
-                    placeholder="输入房间号"
+                    placeholder={t('sync.roomPlaceholder')}
                     value={roomId}
                     onChange={(e) => setRoomId(e.target.value.toUpperCase())}
                     className="flex-1 border-2 border-gray-300 font-medium focus:border-primary/70 dark:border-gray-600 dark:focus:border-primary/80 dark:text-gray-100 rounded-xl bg-white dark:bg-gray-800 py-3"
@@ -909,14 +908,14 @@ export function WebRTCShareModal({
                   {roomId}
                 </div>
                 <div className="text-sm text-blue-600 dark:text-blue-400 font-extrabold uppercase tracking-wider">
-                  将此房间号分享给他人
+                  {t('sync.shareRoomId')}
                 </div>
               </motion.div>
 
               {nearbyPeers.length > 0 && (
                 <motion.div variants={itemVariants}>
                   <h3 className="font-extrabold text-gray-900 dark:text-gray-100 mb-3 text-lg">
-                    已连接用户 ({nearbyPeers.length})
+                    {t('sync.connectedUsers', { count: nearbyPeers.length })}
                   </h3>
                   <div className="space-y-3">
                     {nearbyPeers.map((peer) => (
@@ -928,7 +927,7 @@ export function WebRTCShareModal({
                         <div className="flex items-center gap-3">
                           <Users className="h-5 w-5 text-primary" />
                           <span className="font-extrabold text-gray-900 dark:text-gray-100">
-                            用户 {peer.id.slice(-4)}
+                            {t('sync.user', { id: peer.id.slice(-4) })}
                           </span>
                         </div>
                         <motion.div
@@ -941,7 +940,7 @@ export function WebRTCShareModal({
                             className="bg-primary hover:bg-primary/90 rounded-xl font-extrabold"
                           >
                             <Share className="h-4 w-4 mr-1" />
-                            发送
+                            {t('sync.send')}
                           </Button>
                         </motion.div>
                       </motion.div>
@@ -955,7 +954,7 @@ export function WebRTCShareModal({
                 className="text-center p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-600"
               >
                 <div className="text-gray-500 dark:text-gray-400 font-extrabold text-sm uppercase tracking-wider">
-                  等待用户加入...
+                  {t('sync.waitingUsers')}
                 </div>
               </motion.div>
             </motion.div>
@@ -977,7 +976,7 @@ export function WebRTCShareModal({
                   className="w-full border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold py-3"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  重新开始
+                  {t('sync.restart')}
                 </Button>
               </motion.div>
             </motion.div>

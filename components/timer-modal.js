@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -44,6 +45,7 @@ export function TimerModal({
   const [overtimeSeconds, setOvertimeSeconds] = useState(0); // Track overtime
   const [isOvertimeStarted, setIsOvertimeStarted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const { t } = useTranslation();
 
   // Audio context and buffer refs for true seamless looping
   const audioContextRef = useRef(null);
@@ -626,7 +628,7 @@ export function TimerModal({
                 <Timer className="h-5 w-5 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                {isBreak ? "休息时间" : "专注计时器"}
+                {isBreak ? t('timer.breakTime') : t('timer.focusTimer')}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -665,11 +667,8 @@ export function TimerModal({
               <motion.div variants={itemVariants} className="space-y-3">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   {!isRunning
-                    ? "专注任务"
-                    : `正在专注 ${
-                        incompleteItems.find((item) => item.id === selectedTask)
-                          ?.title
-                      }`}
+                    ? t('timer.focusTask')
+                    : t('timer.focusingOn', { title: incompleteItems.find((item) => item.id === selectedTask)?.title })}
                 </label>
                 {!isRunning &&
                   (incompleteItems.length > 0 ? (
@@ -679,7 +678,7 @@ export function TimerModal({
                       disabled={isRunning}
                     >
                       <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
-                        <SelectValue placeholder="选择任务或习惯" />
+                        <SelectValue placeholder={t('timer.selectTask')} />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         {incompleteItems.map((item) => (
@@ -713,10 +712,10 @@ export function TimerModal({
                         🎉
                       </motion.div>
                       <p className="font-extrabold text-lg text-gray-900 dark:text-gray-100">
-                        今天都完成啦！
+                        {t('timer.allDone')}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        太棒了，完成了所有任务和习惯。
+                        {t('timer.allDoneDesc')}
                       </p>
                     </motion.div>
                   ))}
@@ -736,7 +735,7 @@ export function TimerModal({
                         variant="default"
                       >
                         <CheckCircle className="h-5 w-5 mr-2" />
-                        标记完成
+                        {t('timer.markComplete')}
                       </Button>
                     </motion.div>
                   )}
@@ -782,7 +781,7 @@ export function TimerModal({
                               +{formatTime(overtimeSeconds)}
                             </motion.div>
                             <div className="text-lg text-red-400 uppercase tracking-wider font-bold">
-                              超时
+                              {t('timer.overtime')}
                             </div>
                           </>
                         ) : (
@@ -848,10 +847,10 @@ export function TimerModal({
                         }`}
                       >
                         {timeLeft === 0
-                          ? "⏰ 超时模式"
+                          ? t('timer.overtimeMode')
                           : isBreak
-                          ? "🧘 休息时间"
-                          : "🎯 专注时间"}
+                          ? t('timer.breakLabel')
+                          : t('timer.focusLabel')}
                       </div>
                     </motion.div>
 
@@ -876,7 +875,7 @@ export function TimerModal({
                 {!isBreak && (
                   <motion.div variants={itemVariants} className="space-y-3">
                     <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                      快速预设
+                      {t('timer.quickPresets')}
                     </label>
                     <div className="grid grid-cols-4 gap-2">
                       {presets.map((p) => (

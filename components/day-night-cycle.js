@@ -4,17 +4,16 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useSpring } from "framer-motion";
 import { Sun, Moon, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog } from "lucide-react";
 import { getWeatherIconType } from "@/utils/weather";
+import { useTranslation } from "react-i18next";
+
+const weekdayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 function AnimatedWeekday({ dayIndex, fontSize, textColor }) {
-  const weekdays = [
-    { day: "星期日", width: fontSize * 3.5 },
-    { day: "星期一", width: fontSize * 3.5 },
-    { day: "星期二", width: fontSize * 3.5 },
-    { day: "星期三", width: fontSize * 3.5 },
-    { day: "星期四", width: fontSize * 3.5 },
-    { day: "星期五", width: fontSize * 3.5 },
-    { day: "星期六", width: fontSize * 3.5 },
-  ];
+  const { t } = useTranslation();
+  const weekdays = weekdayKeys.map((key) => ({
+    day: t(`weekday.${key}`),
+    width: fontSize * 3.5,
+  }));
 
   const height = fontSize * 1.2;
 

@@ -12,6 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 import { formatFocusTime } from "@/utils/time";
+import { useTranslation } from "react-i18next";
 
 export function TaskList({
   tasks,
@@ -27,6 +28,7 @@ export function TaskList({
     habits: false,
     tasks: false,
   });
+  const { t } = useTranslation();
 
   // Audio refs for sound effects
   const completeAudioRef = useRef(null);
@@ -235,7 +237,7 @@ export function TaskList({
                 <ChevronDown className="h-4 w-4" />
               </motion.div>
               <RotateCcw className="h-4 w-4" />
-              习惯 ({sortedHabitTasks.filter((t) => t.completed).length}/
+              {t('taskList.habits')} ({sortedHabitTasks.filter((t) => t.completed).length}/
               {sortedHabitTasks.length})
             </motion.button>
 
@@ -310,7 +312,7 @@ export function TaskList({
                 <ChevronDown className="h-4 w-4" />
               </motion.div>
               <Calendar className="h-4 w-4" />
-              任务 ({sortedRegularTasks.filter((t) => t.completed).length}/
+              {t('taskList.tasks')} ({sortedRegularTasks.filter((t) => t.completed).length}/
               {sortedRegularTasks.length})
             </motion.button>
 
@@ -366,7 +368,7 @@ export function TaskList({
             transition={{ duration: 0.3 }}
             className="text-center py-12 text-primary/60 font-bold"
           >
-            <p>还没有任务，添加一个开始吧！</p>
+            <p>{t('taskList.noTasks')}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -521,7 +523,7 @@ function TaskItem({
               className="flex-shrink-0 p-2 opacity-0 group-hover:opacity-100 hover:bg-primary/10 dark:hover:bg-primary/20 rounded-lg transition-all duration-200 mr-2"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              title="添加子任务"
+              title={t('taskList.addSubtask')}
             >
               <Plus className="h-4 w-4 text-primary dark:text-primary" />
             </motion.button>

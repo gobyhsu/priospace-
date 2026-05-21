@@ -21,10 +21,13 @@ import {
   AlertTriangle,
   MapPin,
   RefreshCw,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 export function SettingsModal({
   onClose,
@@ -47,6 +50,7 @@ export function SettingsModal({
   weatherCity,
   onSetWeatherCity,
 }) {
+  const { t } = useTranslation();
   const [editingTagId, setEditingTagId] = useState(null);
   const [weatherInput, setWeatherInput] = useState(weatherCity?.name || "");
   const [weatherSaving, setWeatherSaving] = useState(false);
@@ -82,8 +86,8 @@ export function SettingsModal({
   const themes = [
     {
       id: "default",
-      name: "默认",
-      description: "清新绿色氛围",
+      name: t('theme.default.name'),
+      description: t('theme.default.desc'),
       preview: {
         primary: "#2D5A1B",
         secondary: "#6BA341",
@@ -92,8 +96,8 @@ export function SettingsModal({
     },
     {
       id: "nature",
-      name: "经典",
-      description: "经典暖色调",
+      name: t('theme.nature.name'),
+      description: t('theme.nature.desc'),
       preview: {
         primary: "#8B4B3C",
         secondary: "#B8906B",
@@ -102,8 +106,8 @@ export function SettingsModal({
     },
     {
       id: "neo-brutal",
-      name: "新野兽派",
-      description: "大胆醒目",
+      name: t('theme.neoBrutal.name'),
+      description: t('theme.neoBrutal.desc'),
       preview: {
         primary: "#FF0000",
         secondary: "#FFFF00",
@@ -112,8 +116,8 @@ export function SettingsModal({
     },
     {
       id: "modern",
-      name: "现代",
-      description: "干净极简",
+      name: t('theme.modern.name'),
+      description: t('theme.modern.desc'),
       preview: {
         primary: "#171717",
         secondary: "#F5F5F5",
@@ -122,8 +126,8 @@ export function SettingsModal({
     },
     {
       id: "pastel-dream",
-      name: "粉彩梦境",
-      description: "柔和薰衣草与粉色调",
+      name: t('theme.pastelDream.name'),
+      description: t('theme.pastelDream.desc'),
       preview: {
         primary: "#D67AD2",
         secondary: "#A2DCEF",
@@ -132,8 +136,8 @@ export function SettingsModal({
     },
     {
       id: "quantum-rose",
-      name: "量子玫瑰",
-      description: "鲜艳粉红与青色融合",
+      name: t('theme.quantumRose.name'),
+      description: t('theme.quantumRose.desc'),
       preview: {
         primary: "#D93A7D",
         secondary: "#2DD8C6",
@@ -142,8 +146,8 @@ export function SettingsModal({
     },
     {
       id: "twitter",
-      name: "推特",
-      description: "蓝色与干净对比",
+      name: t('theme.twitter.name'),
+      description: t('theme.twitter.desc'),
       preview: {
         primary: "#1DA1F2",
         secondary: "#F7F9F9",
@@ -152,8 +156,8 @@ export function SettingsModal({
     },
     {
       id: "amber-minimal",
-      name: "琥珀极简",
-      description: "干净琥珀与白色极简",
+      name: t('theme.amberMinimal.name'),
+      description: t('theme.amberMinimal.desc'),
       preview: {
         primary: "#F59E0B",
         secondary: "#E0E7FF",
@@ -348,7 +352,7 @@ export function SettingsModal({
                 <Settings className="h-5 w-5 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                设置
+                {t('settings.title')}
               </h2>
             </div>
             <Button
@@ -374,10 +378,10 @@ export function SettingsModal({
                   <Palette className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      主题
+                      {t('settings.theme')}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      选择你的风格
+                      {t('settings.chooseStyle')}
                     </div>
                   </div>
                 </div>
@@ -445,12 +449,12 @@ export function SettingsModal({
                   </motion.div>
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      {darkMode ? "深色模式" : "浅色模式"}
+                      {darkMode ? t('settings.darkMode') : t('settings.lightMode')}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                       {darkMode
-                        ? "切换到浅色主题"
-                        : "切换到深色主题"}
+                        ? t('settings.switchToLight')
+                        : t('settings.switchToDark')}
                     </div>
                   </div>
                 </div>
@@ -481,10 +485,10 @@ export function SettingsModal({
                   <Sun className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      天气
+                      {t('settings.weather')}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      自动定位或手动输入城市
+                      {t('settings.weatherDesc')}
                     </div>
                   </div>
                 </div>
@@ -500,7 +504,7 @@ export function SettingsModal({
                     </Button>
                   </motion.div>
                   <Input
-                    placeholder="输入城市名称，如：北京"
+                    placeholder={t('settings.weatherPlaceholder')}
                     value={weatherInput}
                     onChange={(e) => setWeatherInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSaveWeatherCity()}
@@ -511,14 +515,46 @@ export function SettingsModal({
                     disabled={weatherSaving}
                     className="font-extrabold px-4"
                   >
-                    {weatherSaving ? "..." : "确定"}
+                    {weatherSaving ? "..." : t('common.confirm')}
                   </Button>
                 </div>
                 {weatherCity && (
                   <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    当前：{weatherCity.name}
+                    {t('settings.weatherCurrent', { name: weatherCity.name })}
                   </div>
                 )}
+              </div>
+            </motion.div>
+
+            {/* Language Selection */}
+            <motion.div variants={itemVariants}>
+              <div className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <div>
+                    <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                      {t('settings.language')}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                      {t('settings.languageDesc')}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {[{ code: 'zh-CN', label: '中文' }, { code: 'zh-TW', label: '繁體' }, { code: 'en', label: 'EN' }, { code: 'es', label: 'ES' }].map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { i18n.changeLanguage(lang.code); localStorage.setItem('language', lang.code); document.documentElement.lang = lang.code; }}
+                      className={`px-2 py-1 text-xs font-bold rounded-lg border-2 transition-all ${
+                        i18n.language === lang.code
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-primary/50'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
@@ -530,10 +566,10 @@ export function SettingsModal({
                 <Tag className="h-5 w-5 text-primary" />
                 <div>
                   <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                    管理分类
+                    {t('settings.manageTags')}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    编辑或删除你的分类
+                    {t('settings.manageTagsDesc')}
                   </div>
                 </div>
               </div>
@@ -541,7 +577,7 @@ export function SettingsModal({
               <div className="max-h-60 overflow-y-auto hide-scroll flex flex-col gap-1">
                 {customTags.length === 0 ? (
                   <p className="text-sm text-gray-500 italic p-4 text-center">
-                    还没有创建分类。
+                    {t('settings.noTags')}
                   </p>
                 ) : (
                   customTags.map((tag) => (
@@ -620,7 +656,7 @@ export function SettingsModal({
                   <Input
                     value={newTagName}
                     onChange={(e) => setNewTagName(e.target.value)}
-                    placeholder="新分类名称"
+                    placeholder={t('settings.newTagName')}
                     className="h-8 py-0 font-bold"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && newTagName.trim()) {
@@ -654,10 +690,10 @@ export function SettingsModal({
                 <RefreshCw className="h-5 w-5 text-primary" />
                 <div>
                   <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                    管理习惯
+                    {t('settings.manageHabits')}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    编辑或删除习惯
+                    {t('settings.manageHabitsDesc')}
                   </div>
                 </div>
               </div>
@@ -665,7 +701,7 @@ export function SettingsModal({
               <div className="max-h-60 overflow-y-auto hide-scroll flex flex-col gap-1">
                 {habits.length === 0 ? (
                   <p className="text-sm text-gray-500 italic p-4 text-center">
-                    还没有创建习惯。
+                    {t('settings.noHabits')}
                   </p>
                 ) : (
                   habits.map((habit) => (
@@ -732,7 +768,7 @@ export function SettingsModal({
                   <Input
                     value={newHabitName}
                     onChange={(e) => setNewHabitName(e.target.value)}
-                    placeholder="新习惯名称"
+                    placeholder={t('settings.newHabitName')}
                     className="h-8 py-0 font-bold"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && newHabitName.trim()) {
@@ -766,7 +802,7 @@ export function SettingsModal({
                           : "border-gray-200 dark:border-gray-700 text-gray-500"
                       }`}
                     >
-                      无分类
+                      {t('common.noTag')}
                     </button>
                     {customTags.map((tag) => (
                       <button
@@ -796,10 +832,10 @@ export function SettingsModal({
                   <Wifi className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <div>
                     <div className="font-extrabold text-blue-700 dark:text-blue-300">
-                      同步任务 (P2P)
+                      {t('settings.syncP2P')}
                     </div>
                     <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                      从/向其他设备同步任务
+                      {t('settings.syncDesc')}
                     </div>
                   </div>
                 </div>
@@ -824,10 +860,10 @@ export function SettingsModal({
                   <Upload className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      导出数据
+                      {t('settings.exportData')}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      备份任务和习惯
+                      {t('settings.exportDesc')}
                     </div>
                   </div>
                 </div>
@@ -854,10 +890,10 @@ export function SettingsModal({
                   <Download className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      导入数据
+                      {t('settings.importData')}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      从备份文件恢复
+                      {t('settings.importDesc')}
                     </div>
                   </div>
                 </div>
@@ -884,10 +920,10 @@ export function SettingsModal({
             >
               <div className="text-center space-y-3">
                 <div className="text-lg font-extrabold text-primary">
-                  优事空间 PrioSpace V1.3.1-zh-CN
+                  {t('settings.version')}
                 </div>
                 <div className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                  专注 · 追踪 · 成就
+                  {t('settings.tagline')}
                 </div>
 
                 {/* vibecoded section */}
@@ -920,10 +956,7 @@ export function SettingsModal({
                     </motion.button>
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300 font-medium pt-2">
-                    汉化 by{" "}
-                    <span className="text-primary font-extrabold">
-                      迷汁逃桃
-                    </span>
+                    {t('settings.localizedBy')}
                   </div>
                 </div>
               </div>
@@ -936,10 +969,10 @@ export function SettingsModal({
                 <AlertTriangle className="h-5 w-5 text-red-500" />
                 <div>
                   <div className="font-extrabold text-red-600 dark:text-red-400">
-                    重置优事空间
+                    {t('settings.resetApp')}
                   </div>
                   <div className="text-sm text-red-500/70 dark:text-red-400/60 font-medium">
-                    永久删除所有数据
+                    {t('settings.resetDesc')}
                   </div>
                 </div>
               </div>
@@ -953,7 +986,7 @@ export function SettingsModal({
                   size="sm"
                   className="rounded-xl font-extrabold px-4"
                 >
-                  重置
+                  {t('common.reset')}
                 </Button>
               </motion.div>
             </div>

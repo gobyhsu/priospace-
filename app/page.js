@@ -26,8 +26,11 @@ import {
   saveCity,
   getCurrentPosition,
 } from "@/utils/weather";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 export default function Home() {
+  const { t } = useTranslation();
   const [darkMode, setDarkMode] = useState(false);
   const [theme, setTheme] = useState("default");
   const [dailyTasks, setDailyTasks] = useState({});
@@ -558,27 +561,25 @@ export default function Home() {
       // 4. Optionally update settings (ask user first)
       const settingsToUpdate = [];
       if (typeof data.darkMode === "boolean" && data.darkMode !== darkMode) {
-        settingsToUpdate.push("深色模式");
+        settingsToUpdate.push(t('page.darkModeSetting'));
       }
       if (data.theme && data.theme !== theme) {
-        settingsToUpdate.push("主题");
+        settingsToUpdate.push(t('page.themeSetting'));
       }
 
       if (settingsToUpdate.length > 0) {
         const updateSettings = confirm(
-          `是否要更新您的${settingsToUpdate.join(
-            " 和 "
-          )}设置以匹配导入的数据？`
+          t('page.updateSettingsConfirm', { settings: settingsToUpdate.join(" / ") })
         );
 
         if (updateSettings) {
           if (typeof data.darkMode === "boolean") {
             setDarkMode(data.darkMode);
-            importStats.updatedSettings.push("深色模式");
+            importStats.updatedSettings.push(t('page.darkModeSetting'));
           }
           if (data.theme) {
             setTheme(data.theme);
-            importStats.updatedSettings.push("主题");
+            importStats.updatedSettings.push(t('page.themeSetting'));
           }
         }
       }
@@ -586,18 +587,18 @@ export default function Home() {
       // Show detailed import summary
       const summaryParts = [];
       if (importStats.newTasks > 0)
-        summaryParts.push(`${importStats.newTasks} 个新任务`);
+        summaryParts.push(t('page.newTasks', { count: importStats.newTasks }));
       if (importStats.updatedTasks > 0)
-        summaryParts.push(`${importStats.updatedTasks} 个更新任务`);
+        summaryParts.push(t('page.updatedTasks', { count: importStats.updatedTasks }));
       if (importStats.newSubtasks > 0)
-        summaryParts.push(`${importStats.newSubtasks} 个新子任务`);
+        summaryParts.push(t('page.newSubtasks', { count: importStats.newSubtasks }));
       if (importStats.newTags > 0)
-        summaryParts.push(`${importStats.newTags} 个新标签`);
+        summaryParts.push(t('page.newTags', { count: importStats.newTags }));
       if (importStats.newHabits > 0)
-        summaryParts.push(`${importStats.newHabits} 个新习惯`);
+        summaryParts.push(t('page.newHabits', { count: importStats.newHabits }));
       if (importStats.updatedSettings.length > 0)
         summaryParts.push(
-          `已更新 ${importStats.updatedSettings.join(" 和 ")}`
+          t('page.updatedSettings', { settings: importStats.updatedSettings.join(" / ") })
         );
 
       const totalChanges =
@@ -608,19 +609,17 @@ export default function Home() {
         importStats.newHabits;
 
       if (totalChanges === 0 && importStats.updatedSettings.length === 0) {
-        alert(
-          "同步完成！未发现新项目——所有数据已同步。"
-        );
+        alert(t('page.syncNoChanges'));
       } else {
         const summaryMessage =
           summaryParts.length > 0
-            ? `同步成功！合并/更新：${summaryParts.join("，")}。`
-            : "同步完成！";
+            ? t('page.syncSuccess', { summary: summaryParts.join(", ") })
+            : t('page.syncDone');
         alert(summaryMessage);
       }
     } catch (error) {
       console.error("Import error:", error);
-      alert("处理同步数据出错，请重试。");
+      alert(t('page.syncError'));
     }
   };
 
@@ -1004,10 +1003,10 @@ export default function Home() {
             if (data.habits) setHabits(data.habits);
             if (typeof data.darkMode === "boolean") setDarkMode(data.darkMode);
             if (data.theme) setTheme(data.theme);
-            alert("数据导入成功！");
+            alert(t('page.importSuccess'));
             setShowSettings(false); // Close settings after import
           } catch (error) {
-            alert("导入数据出错，请检查文件格式。");
+            alert(t('page.importError'));
           }
         };
         reader.readAsText(file);
@@ -1146,7 +1145,7 @@ export default function Home() {
                           value={selectedDate.getDate()}
                           fontSize={20}
                         />
-                        {selectedDate.toLocaleDateString("zh-CN", {
+                        {selectedDate.toLocaleDateString(i18n.language === "zh-TW" ? "zh-TW" : i18n.language, {
                           month: "long",
                         })}
                       </div>
@@ -1183,7 +1182,7 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-orange-500" />
                       <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                        有 {pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0)} 项历史未完成
+                        {t('page.incompleteBanner', { count: pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0) })}
                       </span>
                     </div>
                     <ChevronDown className={`h-4 w-4 text-orange-400 transition-transform ${showIncompletePanel ? "rotate-180" : ""}`} />
@@ -1207,7 +1206,7 @@ export default function Home() {
                                 }}
                                 className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
                               >
-                                {new Date(date + "T00:00:00").toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })} ›
+                                {new Date(date + "T00:00:00").toLocaleDateString(i18n.language === "zh-TW" ? "zh-TW" : i18n.language, { month: "long", day: "numeric", weekday: "short" })} ›
                               </button>
                             </div>
                             {tasks.map((task) => (
@@ -1254,7 +1253,7 @@ export default function Home() {
                   >
                     <div className="group-hover:scale-110 transition-transform  flex items-center gap-2">
                       <Timer className="h-5 w-5" />
-                      <span>计时器</span>
+                      <span>{t('page.timer')}</span>
                     </div>
                   </Button>
 
@@ -1274,7 +1273,7 @@ export default function Home() {
                   >
                     <div className="group-hover:scale-110 transition-transform  flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
-                      <span>习惯</span>
+                      <span>{t('page.habits')}</span>
                     </div>
                   </Button>
                 </div>
@@ -1298,7 +1297,7 @@ export default function Home() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                       <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
-                    优事空间 PrioSpace
+                    PrioSpace
                   </div>
                   <button
                     onClick={() => setShowSettings(true)}
@@ -1323,7 +1322,7 @@ export default function Home() {
                             value={selectedDate.getDate()}
                             fontSize={20}
                           />
-                          {selectedDate.toLocaleDateString("zh-CN", {
+                          {selectedDate.toLocaleDateString(i18n.language === "zh-TW" ? "zh-TW" : i18n.language, {
                             month: "long",
                           })}
                         </div>
@@ -1357,7 +1356,7 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-orange-500" />
                         <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                          有 {pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0)} 项历史未完成
+                          ${t('page.incompleteBanner', { count: pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0) })}
                         </span>
                       </div>
                       <ChevronDown className={`h-4 w-4 text-orange-400 transition-transform ${showIncompletePanel ? "rotate-180" : ""}`} />
@@ -1381,7 +1380,7 @@ export default function Home() {
                                   }}
                                   className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
                                 >
-                                  {new Date(date + "T00:00:00").toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })} ›
+                                  {new Date(date + "T00:00:00").toLocaleDateString(i18n.language === "zh-TW" ? "zh-TW" : i18n.language, { month: "long", day: "numeric", weekday: "short" })} ›
                                 </button>
                               </div>
                               {tasks.map((task) => (
@@ -1415,7 +1414,7 @@ export default function Home() {
                     className="w-full h-12 bg-primary hover:bg-primary/90 group hover:scale-[1.02] transition-all duration-200 [&_svg]:size-5 rounded-2xl"
                   >
                     <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">添加任务</span>
+                    <span className="font-extrabold">{t("addTask.addTask")}</span>
                   </Button>
 
                   <Button
@@ -1425,7 +1424,7 @@ export default function Home() {
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
                   >
                     <Timer className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">计时器</span>
+                    <span className="font-extrabold">{t('page.timer')}</span>
                   </Button>
 
                   <Button
@@ -1435,17 +1434,17 @@ export default function Home() {
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
                   >
                     <BarChart3 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold">习惯</span>
+                    <span className="font-extrabold">{t('page.habits')}</span>
                   </Button>
                 </div>
 
                 {/* Keyboard shortcuts hint */}
                 <div className="p-6 pt-0 text-[10px] text-muted-foreground font-extrabold space-y-1 opacity-70">
-                  <div>⌘/Ctrl + A → 添加任务</div>
-                  <div>⌘/Ctrl + C → 计时器</div>
-                  <div>⌘/Ctrl + H → 习惯</div>
-                  <div>⌘/Ctrl + X → 设置</div>
-                  <div>Esc → 关闭弹窗</div>
+                  <div>⌘/Ctrl + A → {t("addTask.addTask")}</div>
+                  <div>⌘/Ctrl + C → {t("page.timer")}</div>
+                  <div>⌘/Ctrl + H → {t("page.habits")}</div>
+                  <div>⌘/Ctrl + X → {t("settings.title")}</div>
+                  <div>Esc → {t("common.close")}</div>
                 </div>
               </motion.div>
             </div>
