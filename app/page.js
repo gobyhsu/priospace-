@@ -1356,7 +1356,7 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-orange-500" />
                         <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                          ${t('page.incompleteBanner', { count: pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0) })}
+                          {t('page.incompleteBanner', { count: pastIncomplete.reduce((sum, d) => sum + d.tasks.length, 0) })}
                         </span>
                       </div>
                       <ChevronDown className={`h-4 w-4 text-orange-400 transition-transform ${showIncompletePanel ? "rotate-180" : ""}`} />
