@@ -595,7 +595,7 @@ export function TaskOptionsModal({
                 {t('taskOptions.changeCategory')}
               </label>
 
-              <Select value={selectedTag} onValueChange={handleTagChange}>
+              <Select value={selectedTag || undefined} onValueChange={handleTagChange}>
                 <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
                   <SelectValue placeholder={t('taskOptions.selectCategory')} />
                 </SelectTrigger>
