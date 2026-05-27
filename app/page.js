@@ -37,6 +37,8 @@ export default function Home() {
   const [customTags, setCustomTags] = useState([]);
   const [habits, setHabits] = useState([]);
   const [showTimer, setShowTimer] = useState(false);
+  const [timerMinimized, setTimerMinimized] = useState(false);
+  const [timerIndicator, setTimerIndicator] = useState(null); // { isBreak, isOvertime, taskTitle, timeLeft, overtimeSeconds }
   const [showHabits, setShowHabits] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [showTaskOptions, setShowTaskOptions] = useState(false);
@@ -202,6 +204,8 @@ export default function Home() {
         setShowAddTask(false);
         setShowHabits(false);
         setShowTimer(false);
+        setTimerMinimized(false);
+        setTimerIndicator(null);
         setShowSettings(false);
         setShowTaskOptions(false);
         setShowAddSubtask(false);
@@ -234,7 +238,12 @@ export default function Home() {
             break;
           case "c": // Ctrl/Cmd + C for Timer
             event.preventDefault();
-            setShowTimer(true);
+            if (timerMinimized) {
+              setShowTimer(true);
+              setTimerMinimized(false);
+            } else {
+              setShowTimer(true);
+            }
             break;
           case "x": // Ctrl/Cmd + X for Settings
             event.preventDefault();
@@ -301,8 +310,8 @@ export default function Home() {
       id: `habit-${habit.id}-${dateString}`,
       title: habit.name,
       completed: habit.completedDates.includes(dateString),
-      timeSpent: 0,
-      focusTime: 0,
+      timeSpent: (habit.timeSpents && habit.timeSpents[dateString]) || 0,
+      focusTime: (habit.focusTimes && habit.focusTimes[dateString]) || 0,
       createdAt: selectedDate,
       isHabit: true,
       habitId: habit.id,
@@ -837,6 +846,25 @@ export default function Home() {
 
   const updateTaskTime = (id, timeToAdd) => {
     const dateString = getDateString(selectedDate);
+
+    // Handle habit tasks (ID format: "habit-{habitId}-{YYYY-MM-DD}")
+    if (id.startsWith("habit-")) {
+      const stripped = id.slice(6);
+      const lastDash = stripped.lastIndexOf("-");
+      const secondLast = stripped.lastIndexOf("-", lastDash - 1);
+      const thirdLast = stripped.lastIndexOf("-", secondLast - 1);
+      const habitId = stripped.slice(0, thirdLast);
+      setHabits((prev) =>
+        prev.map((habit) => {
+          if (habit.id !== habitId) return habit;
+          const ts = { ...(habit.timeSpents || {}) };
+          ts[dateString] = (ts[dateString] || 0) + timeToAdd;
+          return { ...habit, timeSpents: ts };
+        })
+      );
+      return;
+    }
+
     const currentTasks = getCurrentDayTasks();
     const updatedTasks = updateTaskInList(
       id,
@@ -911,6 +939,25 @@ export default function Home() {
 
   const updateTaskFocusTime = (id, focusTimeToAdd) => {
     const dateString = getDateString(selectedDate);
+
+    // Handle habit tasks (ID format: "habit-{habitId}-{YYYY-MM-DD}")
+    if (id.startsWith("habit-")) {
+      const stripped = id.slice(6);
+      const lastDash = stripped.lastIndexOf("-");
+      const secondLast = stripped.lastIndexOf("-", lastDash - 1);
+      const thirdLast = stripped.lastIndexOf("-", secondLast - 1);
+      const habitId = stripped.slice(0, thirdLast);
+      setHabits((prev) =>
+        prev.map((habit) => {
+          if (habit.id !== habitId) return habit;
+          const ft = { ...(habit.focusTimes || {}) };
+          ft[dateString] = (ft[dateString] || 0) + focusTimeToAdd;
+          return { ...habit, focusTimes: ft };
+        })
+      );
+      return;
+    }
+
     const currentTasks = getCurrentDayTasks();
     const updatedTasks = updateTaskInList(
       id,
@@ -1167,6 +1214,49 @@ export default function Home() {
                   dailyTasks={dailyTasks}
                 />              </div>
 
+              {/* Timer Running Indicator (mobile) */}
+              {timerMinimized && timerIndicator && (
+                <div
+                  onClick={() => { setShowTimer(true); setTimerMinimized(false); }}
+                  className={`mx-4 mb-3 flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    timerIndicator.isOvertime
+                      ? "bg-red-500/8 border-red-500/30 animate-pulse"
+                      : "bg-primary/8 border-primary/30"
+                  }`}
+                >
+                  <div className={`w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0 ${
+                    timerIndicator.isOvertime ? "bg-red-500" : "bg-primary animate-pulse"
+                  }`} />
+                  <div className="flex-1 flex flex-col gap-0.5">
+                    <span className={`text-sm font-bold ${
+                      timerIndicator.isOvertime ? "text-red-500" : "text-primary"
+                    }`}>
+                      {timerIndicator.isOvertime
+                        ? "⏰ 超时中"
+                        : timerIndicator.isBreak
+                        ? "🧘 休息中"
+                        : "⏱ 专注中"}
+                      {timerIndicator.taskTitle ? ` · ${timerIndicator.taskTitle}` : ""}
+                    </span>
+                    {timerIndicator.timeLeft > 0 && (
+                      <span className={`text-lg font-black tabular-nums ${
+                        timerIndicator.isOvertime ? "text-red-500" : "text-primary"
+                      }`}>
+                        {String(Math.floor(timerIndicator.timeLeft / 60)).padStart(2, "0")}:{String(timerIndicator.timeLeft % 60).padStart(2, "0")}
+                      </span>
+                    )}
+                    {timerIndicator.overtimeSeconds > 0 && (
+                      <span className="text-lg font-black text-red-500 tabular-nums">
+                        +{String(Math.floor(timerIndicator.overtimeSeconds / 60)).padStart(2, "0")}:{String(timerIndicator.overtimeSeconds % 60).padStart(2, "0")}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-xs flex-shrink-0 ${
+                    timerIndicator.isOvertime ? "text-red-500/60" : "text-primary/60"
+                  }`}>点击恢复 ›</span>
+                </div>
+              )}
+
               {/* Past incomplete tasks banner */}
               {pastIncomplete.length > 0 && (
                 <motion.div
@@ -1345,6 +1435,43 @@ export default function Home() {
                     dailyTasks={dailyTasks}
                   />
                 </div>
+
+                {/* Timer Running Indicator (desktop sidebar) */}
+                {timerMinimized && timerIndicator && (
+                  <div
+                    onClick={() => { setShowTimer(true); setTimerMinimized(false); }}
+                    className={`mx-4 mb-2 flex items-start gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                      timerIndicator.isOvertime
+                        ? "bg-red-500/8 border-red-500/30"
+                        : "bg-primary/8 border-primary/30"
+                    }`}
+                  >
+                    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                      timerIndicator.isOvertime ? "bg-red-500" : "bg-primary animate-pulse"
+                    }`} />
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <span className={`text-xs font-bold ${
+                        timerIndicator.isOvertime ? "text-red-500" : "text-primary"
+                      }`}>
+                        {timerIndicator.isOvertime
+                          ? "⏰ 超时中"
+                          : timerIndicator.isBreak
+                          ? "🧘 休息中"
+                          : "⏱ 专注中"}
+                        {timerIndicator.taskTitle ? ` · ${timerIndicator.taskTitle}` : ""}
+                      </span>
+                      {timerIndicator.overtimeSeconds > 0 ? (
+                        <span className="text-base font-black text-red-500 tabular-nums">
+                          +{String(Math.floor(timerIndicator.overtimeSeconds / 60)).padStart(2, "0")}:{String(timerIndicator.overtimeSeconds % 60).padStart(2, "0")}
+                        </span>
+                      ) : timerIndicator.timeLeft > 0 && (
+                        <span className="text-base font-black text-primary tabular-nums">
+                          {String(Math.floor(timerIndicator.timeLeft / 60)).padStart(2, "0")}:{String(timerIndicator.timeLeft % 60).padStart(2, "0")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Past incomplete tasks (desktop sidebar) */}
                 {pastIncomplete.length > 0 && (
@@ -1566,19 +1693,28 @@ export default function Home() {
                 onAddCustomTag={addCustomTag}
               />
             )}
-
-            {showTimer && (
-              <TimerModal
-                tasks={flatTaskList} // Use flattened list for timer
-                onClose={() => setShowTimer(false)}
-                onUpdateTaskTime={updateTaskTime}
-                onUpdateTaskFocusTime={updateTaskFocusTime}
-                onToggleTask={toggleTask}
-              />
-            )}
           </AnimatePresence>
         </div>
       )}
+
+      {/* Timer Modal — always mounted, outside layout blocks so it works on both mobile & desktop */}
+      <TimerModal
+        visible={showTimer}
+        tasks={flatTaskList}
+        onClose={() => {
+          setShowTimer(false);
+          setTimerMinimized(false);
+          setTimerIndicator(null);
+        }}
+        onMinimize={(data) => {
+          setShowTimer(false);
+          setTimerMinimized(true);
+          setTimerIndicator(data);
+        }}
+        onUpdateTaskTime={updateTaskTime}
+        onUpdateTaskFocusTime={updateTaskFocusTime}
+        onToggleTask={toggleTask}
+      />
     </>
   );
 }

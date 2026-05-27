@@ -495,22 +495,14 @@ function TaskItem({
                 {task.title}
               </motion.span>
 
-              {(displayTimeSpent > 0 || displayFocusTime > 0) && (
+              {displayFocusTime > 0 && (
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {displayTimeSpent > 0 && (
-                    <div className="flex items-center gap-1 font-extrabold opacity-80">
-                      <Clock className="h-3 w-3" />
-                      <span>{formatTime(displayTimeSpent)}</span>
-                    </div>
-                  )}
-                  {displayFocusTime > 0 && (
-                    <div className="flex items-center gap-1 font-extrabold opacity-80">
-                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                      <span className="text-blue-600 dark:text-blue-400">
-                        {formatFocusTime(displayFocusTime)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1 font-extrabold opacity-80">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-blue-600 dark:text-blue-400">
+                      {formatFocusTime(displayFocusTime)}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>

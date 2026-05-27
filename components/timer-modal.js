@@ -16,6 +16,9 @@ import {
   Briefcase,
   Volume2,
   VolumeX,
+  ChevronDown,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +31,10 @@ import {
 import { CountdownTimer } from "@/components/countdown-timer";
 
 export function TimerModal({
+  visible = true,
   tasks,
   onClose,
+  onMinimize,
   onUpdateTaskTime,
   onUpdateTaskFocusTime,
   onToggleTask,
@@ -55,6 +60,7 @@ export function TimerModal({
   const isInitializedRef = useRef(false);
   const completeAudioRef = useRef(null);
   const modalRef = useRef(null);
+  const focusAccumRef = useRef(0);
 
   if (typeof window !== "undefined") {
     if (!completeAudioRef.current) {
@@ -353,12 +359,20 @@ export function TimerModal({
   useEffect(() => {
     let focusInterval;
     if (isRunning && !isBreak && selectedTask) {
+      focusAccumRef.current = 0;
       focusInterval = setInterval(() => {
         const now = Date.now();
         const timeDiff = Math.floor((now - lastFocusUpdate) / 1000);
         if (timeDiff >= 10) {
           onUpdateTaskFocusTime(selectedTask, 10);
           setLastFocusUpdate(now);
+          // Sync timeSpent every 60 seconds
+          focusAccumRef.current += 10;
+          if (focusAccumRef.current >= 60) {
+            const mins = Math.floor(focusAccumRef.current / 60);
+            onUpdateTaskTime(selectedTask, mins);
+            focusAccumRef.current = focusAccumRef.current % 60;
+          }
         }
       }, 10000);
     }
@@ -368,6 +382,7 @@ export function TimerModal({
     isBreak,
     selectedTask,
     onUpdateTaskFocusTime,
+    onUpdateTaskTime,
     lastFocusUpdate,
   ]);
 
@@ -377,6 +392,24 @@ export function TimerModal({
       setLastFocusUpdate(Date.now());
     }
   }, [isRunning, isBreak, selectedTask]);
+
+  // When minimized (not visible) but running, update indicator every second
+  useEffect(() => {
+    if (!visible && isRunning && onMinimize) {
+      const items = (tasks || []).filter((item) => !item.completed);
+      const title = items.find((item) => item.id === selectedTask)?.title || "";
+      const interval = setInterval(() => {
+        onMinimize({
+          isBreak,
+          isOvertime: timeLeft === 0 && overtimeSeconds > 0,
+          taskTitle: title,
+          timeLeft,
+          overtimeSeconds,
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [visible, isRunning, isBreak, timeLeft, overtimeSeconds, selectedTask, tasks, onMinimize]);
 
   // Audio control based on timer state
   useEffect(() => {
@@ -433,8 +466,15 @@ export function TimerModal({
   };
 
   const handleStart = () => {
-    if (!isRunning && timeLeft > 0) {
-      setSessionStartTime(timeLeft);
+    if (!isRunning) {
+      let startTime = timeLeft;
+      if (startTime === 0) {
+        const presetVal = isBreak ? "5" : workPreset;
+        const presetData = presets.find((p) => p.value === presetVal);
+        startTime = presetData ? presetData.seconds : 25 * 60;
+        setTimeLeft(startTime);
+      }
+      setSessionStartTime(startTime);
       setOvertimeSeconds(0);
       setIsOvertimeStarted(false);
     }
@@ -505,8 +545,24 @@ export function TimerModal({
     onClose();
   };
 
+  const handleMinimize = () => {
+    stopAllAudio();
+    if (onMinimize) {
+      const items = (tasks || []).filter((item) => !item.completed);
+      const title = items.find((item) => item.id === selectedTask)?.title || "";
+      onMinimize({
+        isBreak,
+        isOvertime: timeLeft === 0 && overtimeSeconds > 0,
+        taskTitle: title,
+        timeLeft,
+        overtimeSeconds,
+      });
+    }
+  };
+
   // Filter to show all incomplete tasks and habits
-  const incompleteItems = tasks.filter((item) => !item.completed);
+  const incompleteItems = (tasks || []).filter((item) => !item.completed);
+  const selectedTaskTitle = incompleteItems.find((item) => item.id === selectedTask)?.title || "";
 
   // Animation variants
   const backdropVariants = {
@@ -568,14 +624,18 @@ export function TimerModal({
     },
   };
 
+  if (!visible) return null;
+
   return (
     <motion.div
       variants={backdropVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50"
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
+      className={`fixed inset-0 backdrop-blur-sm flex items-end justify-center z-50 transition-colors duration-400 ${
+        isRunning ? "bg-black/92" : "bg-black/60"
+      }`}
+      onClick={(e) => e.target === e.currentTarget && (isRunning ? handleMinimize() : handleClose())}
     >
       <motion.div
         ref={modalRef}
@@ -583,78 +643,116 @@ export function TimerModal({
         initial="hidden"
         animate="visible"
         exit="exit"
-        drag="y"
+        drag={isRunning ? false : "y"}
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={{ top: 0, bottom: 0.5 }}
         onDragEnd={(_, info) => {
+          if (isRunning) return;
           const modalHeight = modalRef.current?.offsetHeight || 0;
           if (info.offset.y > modalHeight / 2.5) {
-            handleClose(); // Use handleClose to ensure audio stops
+            handleClose();
           }
         }}
-        className="bg-white dark:bg-gray-900 rounded-t-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl border-t border-gray-200 dark:border-gray-700 relative touch-none"
+        className={`w-full max-w-lg overflow-hidden shadow-2xl relative touch-none transition-all duration-400 ${
+          isRunning
+            ? "rounded-none max-h-screen h-screen flex flex-col bg-gradient-to-b from-white to-primary/[0.15] dark:from-gray-900 dark:to-primary/[0.15]"
+            : "bg-white dark:bg-gray-900 rounded-t-3xl max-h-[90vh] border-t border-gray-200 dark:border-gray-700"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag Handle */}
-        <motion.div
-          className="flex justify-center pt-4 pb-3 cursor-grab active:cursor-grabbing"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div
-            className="w-12 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full cursor-pointer"
-            onClick={handleClose}
-          />
-        </motion.div>
-
-        <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-70px)]">
-          {/* Header */}
+        {/* Drag Handle — hidden when running */}
+        {!isRunning && (
           <motion.div
-            variants={itemVariants}
-            className="flex items-center justify-between mb-6"
+            className="flex justify-center pt-4 pb-3 cursor-grab active:cursor-grabbing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            <div className="flex items-center gap-3">
-              <motion.div
-                initial={{ rotate: -10, scale: 0.8 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{
-                  delay: 0.25,
-                  type: "spring",
-                  stiffness: 300,
-                }}
-                className="p-2.5 bg-primary/10 rounded-xl"
-              >
-                <Timer className="h-5 w-5 text-primary" />
-              </motion.div>
-              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
-                {isBreak ? t('timer.breakTime') : t('timer.focusTimer')}
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Mute/Unmute Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleMute}
-                className="hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 dark:text-white"
-              >
-                {isMuted ? (
-                  <VolumeX className="h-5 w-5" />
-                ) : (
-                  <Volume2 className="h-5 w-5" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClose}
-                className="hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 dark:text-white"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+            <div
+              className="w-12 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full cursor-pointer"
+              onClick={handleClose}
+            />
           </motion.div>
+        )}
+
+        <div className={`px-6 pb-6 overflow-y-auto ${
+          isRunning
+            ? "flex-1 max-h-none flex flex-col items-center justify-center"
+            : "max-h-[calc(90vh-70px)]"
+        }`}>
+          {/* Header — only when idle */}
+          {!isRunning && (
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center justify-between mb-6"
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  initial={{ rotate: -10, scale: 0.8 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{
+                    delay: 0.25,
+                    type: "spring",
+                    stiffness: 300,
+                  }}
+                  className="p-2.5 bg-primary/10 rounded-xl"
+                >
+                  <Timer className="h-5 w-5 text-primary" />
+                </motion.div>
+                <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-wide">
+                  {isBreak ? t('timer.breakTime') : t('timer.focusTimer')}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleMute}
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 dark:text-white"
+                >
+                  {isMuted ? (
+                    <VolumeX className="h-5 w-5" />
+                  ) : (
+                    <Volume2 className="h-5 w-5" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClose}
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 dark:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Immersive task name — always show when running */}
+          {isRunning && (
+            <div className="text-center mb-3">
+              <span className="text-base font-bold text-gray-800 dark:text-gray-200 opacity-85">
+                {isBreak ? "🧘 休息中" : selectedTaskTitle || "🎯 专注中"}
+              </span>
+            </div>
+          )}
+
+          {/* Finish task button — below task name, always rendered for consistent height */}
+          {isRunning && (
+            <div className={`flex items-center justify-center gap-2 mb-5 ${
+              !selectedTask || isBreak ? "opacity-0 pointer-events-none" : "opacity-70"
+            }`}>
+              <button
+                onClick={handleFinishTask}
+                className="flex items-center gap-2 hover:opacity-100 transition-opacity"
+              >
+                <div className="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center">
+                  <span className="text-xs font-extrabold text-primary">✓</span>
+                </div>
+                <span className="text-sm font-bold text-primary">任务完成</span>
+              </button>
+            </div>
+          )}
 
           <motion.div
             variants={contentVariants}
@@ -662,83 +760,59 @@ export function TimerModal({
             animate="visible"
             className="space-y-6"
           >
-            {/* Task Selection - Only show during work sessions */}
-            {!isBreak && (
+            {/* Task Selection — only when idle */}
+            {!isBreak && !isRunning && (
               <motion.div variants={itemVariants} className="space-y-3">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                  {!isRunning
-                    ? t('timer.focusTask')
-                    : t('timer.focusingOn', { title: incompleteItems.find((item) => item.id === selectedTask)?.title })}
+                  {t('timer.focusTask')}
                 </label>
-                {!isRunning &&
-                  (incompleteItems.length > 0 ? (
-                    <Select
-                      value={selectedTask}
-                      onValueChange={setSelectedTask}
-                      disabled={isRunning}
-                    >
-                      <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
-                        <SelectValue placeholder={t('timer.selectTask')} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                        {incompleteItems.map((item) => (
-                          <SelectItem
-                            key={item.id}
-                            value={item.id}
-                            className="rounded-lg dark:hover:bg-gray-700 dark:text-gray-100"
-                          >
-                            <div className="flex items-center gap-2 font-extrabold">
-                              {item.title}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
+                {incompleteItems.length > 0 ? (
+                  <Select
+                    value={selectedTask}
+                    onValueChange={setSelectedTask}
+                  >
+                    <SelectTrigger className="border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3">
+                      <SelectValue placeholder={t('timer.selectTask')} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                      {incompleteItems.map((item) => (
+                        <SelectItem
+                          key={item.id}
+                          value={item.id}
+                          className="rounded-lg dark:hover:bg-gray-700 dark:text-gray-100"
+                        >
+                          <div className="flex items-center gap-2 font-extrabold">
+                            {item.title}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    className="p-6 bg-gray-50 dark:bg-gray-800/80 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-center"
+                  >
                     <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      className="p-6 bg-gray-50 dark:bg-gray-800/80 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-center"
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                      }}
+                      className="text-4xl mb-3"
                     >
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 3,
-                        }}
-                        className="text-4xl mb-3"
-                      >
-                        🎉
-                      </motion.div>
-                      <p className="font-extrabold text-lg text-gray-900 dark:text-gray-100">
-                        {t('timer.allDone')}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {t('timer.allDoneDesc')}
-                      </p>
+                      🎉
                     </motion.div>
-                  ))}
-
-                {incompleteItems.length > 0 &&
-                  (isBreak || selectedTask) &&
-                  !isBreak &&
-                  isRunning && (
-                    <motion.div
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                    >
-                      <Button
-                        onClick={handleFinishTask}
-                        disabled={!selectedTask}
-                        className={`w-full rounded-xl font-extrabold py-4 text-lg shadow-lg bg-primary hover:bg-primary/70 text-white`}
-                        variant="default"
-                      >
-                        <CheckCircle className="h-5 w-5 mr-2" />
-                        {t('timer.markComplete')}
-                      </Button>
-                    </motion.div>
-                  )}
+                    <p className="font-extrabold text-lg text-gray-900 dark:text-gray-100">
+                      {t('timer.allDone')}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {t('timer.allDoneDesc')}
+                    </p>
+                  </motion.div>
+                )}
               </motion.div>
             )}
 
@@ -752,29 +826,32 @@ export function TimerModal({
                 >
                   <div className="relative inline-block">
                     <div className="flex items-center justify-center">
-                      {/* Minus Button */}
-                      <motion.div
-                        className="mr-6 sm:flex hidden"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => adjustTime(-5)}
-                          className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-12 p-0"
+                      {/* Minus Button — show when idle or on break */}
+                      {(!isRunning || isBreak) ? (
+                        <motion.div
+                          className="mr-6 sm:flex hidden"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                         >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                      </motion.div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => adjustTime(-5)}
+                            className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-14 h-14 p-0"
+                          >
+                            <Minus className="h-5 w-5" />
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <div className="mr-6 sm:flex hidden w-14 h-14" />
+                      )}
 
                       {/* Timer */}
                       <div className="mx-4">
                         {timeLeft === 0 ? (
-                          // Show overtime counter
                           <>
                             <motion.div
-                              className="text-7xl font-extrabold text-red-500 mb-2"
+                              className={`font-extrabold text-red-500 mb-2 ${isRunning ? "text-8xl" : "text-7xl"}`}
                               animate={{ scale: [1, 1.05, 1] }}
                               transition={{ duration: 1, repeat: Infinity }}
                             >
@@ -785,10 +862,9 @@ export function TimerModal({
                             </div>
                           </>
                         ) : (
-                          // Show regular countdown
                           <CountdownTimer
                             value={timeLeft}
-                            fontSize={84}
+                            fontSize={isRunning ? 110 : 84}
                             textColor={
                               isBreak ? "#10b981" : "hsl(var(--primary))"
                             }
@@ -797,39 +873,46 @@ export function TimerModal({
                         )}
                       </div>
 
-                      {/* Plus Button */}
+                      {/* Plus Button — show when idle or on break */}
+                      {(!isRunning || isBreak) ? (
+                        <motion.div
+                          className="ml-6 sm:flex hidden"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => adjustTime(5)}
+                            className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-14 h-14 p-0"
+                          >
+                            <Plus className="h-5 w-5" />
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <div className="ml-6 sm:flex hidden w-14 h-14" />
+                      )}
+                    </div>
+                  </div>
+
+                  <motion.div className="flex justify-center items-center gap-2">
+                    {/* Mobile adjust buttons */}
+                    {(!isRunning || isBreak) && (
                       <motion.div
-                        className="ml-6 sm:flex hidden"
+                        className="flex sm:hidden"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => adjustTime(5)}
-                          className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-12 p-0"
+                          onClick={() => adjustTime(-5)}
+                          className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-10 p-0"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Minus className="h-4 w-4" />
                         </Button>
                       </motion.div>
-                    </div>
-                  </div>
-
-                  <motion.div className="flex justify-center items-center gap-2">
-                    <motion.div
-                      className="flex sm:hidden"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => adjustTime(-5)}
-                        className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-10 p-0"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
+                    )}
 
                     {/* Session Status */}
                     <motion.div
@@ -838,7 +921,9 @@ export function TimerModal({
                       className="flex justify-center items-center"
                     >
                       <div
-                        className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-wider shadow-lg ${
+                        className={`inline-flex items-center px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wider shadow-lg ${
+                          isRunning ? "text-base" : "text-sm"
+                        } ${
                           timeLeft === 0
                             ? "bg-red-100 text-red-600 border-2 border-red-300"
                             : isBreak
@@ -854,25 +939,28 @@ export function TimerModal({
                       </div>
                     </motion.div>
 
-                    <motion.div
-                      className="flex sm:hidden"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => adjustTime(5)}
-                        className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-10 p-0"
+                    {/* Mobile adjust buttons */}
+                    {(!isRunning || isBreak) && (
+                      <motion.div
+                        className="flex sm:hidden"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                       >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => adjustTime(5)}
+                          className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-10 p-0"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
+                    )}
                   </motion.div>
                 </motion.div>
 
-                {/* Preset Selection - Only show during work sessions */}
-                {!isBreak && (
+                {/* Preset Selection - Only show during work sessions when not running */}
+                {!isBreak && !isRunning && (
                   <motion.div variants={itemVariants} className="space-y-3">
                     <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                       {t('timer.quickPresets')}
@@ -905,72 +993,88 @@ export function TimerModal({
 
                 {/* Control Buttons - Music Player Style */}
                 <motion.div variants={itemVariants} className="space-y-4">
-                  {/* Music Player Controls */}
                   <div className="flex justify-center items-center gap-8">
                     {/* Stop/Reset Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                       <Button
                         variant="outline"
                         onClick={handleAbandon}
-                        className="w-14 h-14 p-0 rounded-full font-extrabold border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100"
+                        className={`${isRunning ? "w-16 h-16" : "w-14 h-14"} p-0 rounded-full font-extrabold border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100`}
                       >
-                        <Square className="h-6 w-6" />
+                        <Square className={isRunning ? "h-7 w-7" : "h-6 w-6"} />
                       </Button>
                     </motion.div>
 
                     {/* Play/Pause Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                       <Button
                         onClick={handleStart}
-                        className="w-16 h-16 p-0 rounded-full font-extrabold text-lg shadow-lg"
+                        className={`${isRunning ? "w-20 h-20" : "w-16 h-16"} p-0 rounded-full font-extrabold text-lg shadow-lg`}
                         disabled={!isBreak && !selectedTask && timeLeft > 0}
                       >
                         {isRunning ? (
-                          <Pause className="h-7 w-7" />
+                          <Pause className={isRunning ? "h-8 w-8" : "h-7 w-7"} />
                         ) : (
-                          <Play className="h-7 w-7" />
+                          <Play className={isRunning ? "h-8 w-8" : "h-7 w-7"} />
                         )}
                       </Button>
                     </motion.div>
 
-                    {/* Break Button */}
-                    {!isBreak && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
+                    {/* Break / Back to Work */}
+                    {!isBreak ? (
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                         <Button
                           variant="outline"
                           onClick={handleBreak}
-                          className="w-14 h-14 p-0 rounded-full font-extrabold border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100"
+                          className={`${isRunning ? "w-16 h-16" : "w-14 h-14"} p-0 rounded-full font-extrabold border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100`}
                         >
-                          <Coffee className="h-6 w-6" />
+                          <Coffee className={isRunning ? "h-7 w-7" : "h-6 w-6"} />
                         </Button>
                       </motion.div>
-                    )}
-
-                    {/* Back to Work Button (during break) */}
-                    {isBreak && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
+                    ) : (
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                         <Button
                           variant="outline"
                           onClick={handleBackToWork}
-                          className="w-14 h-14 p-0 rounded-full border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100"
+                          className={`${isRunning ? "w-16 h-16" : "w-14 h-14"} p-0 rounded-full border-2 border-gray-300 hover:border-primary/70 dark:border-gray-600 dark:hover:border-primary/80 dark:text-gray-100`}
                         >
-                          <Briefcase className="h-6 w-6" />
+                          <Briefcase className={isRunning ? "h-7 w-7" : "h-6 w-6"} />
                         </Button>
                       </motion.div>
                     )}
                   </div>
+
+                  {/* Bottom bar: mute + minimize (immersive mode only) */}
+                  {isRunning && (
+                    <div className="flex justify-center items-center gap-12 pt-4 pb-2">
+                      <button
+                        onClick={toggleMute}
+                        className="flex flex-col items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white/45 dark:bg-gray-800/45 backdrop-blur border border-gray-300/20 dark:border-gray-600/20 flex items-center justify-center">
+                          {isMuted ? (
+                            <BellOff className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                          ) : (
+                            <Bell className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                          )}
+                        </div>
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 px-2 py-0.5 rounded-md">
+                          {isMuted ? t('timer.muted', '已静音') : t('timer.sound', '声音')}
+                        </span>
+                      </button>
+                      <button
+                        onClick={handleMinimize}
+                        className="flex flex-col items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white/45 dark:bg-gray-800/45 backdrop-blur border border-gray-300/20 dark:border-gray-600/20 flex items-center justify-center">
+                          <ChevronDown className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 px-2 py-0.5 rounded-md">
+                          {t('timer.minimize', '收起')}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               </>
             )}
