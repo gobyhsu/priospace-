@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { X, Plus, Tag, Check, Calendar } from "lucide-react";
+import { X, Plus, Tag, Check, Calendar, Clock, ArrowUp, Minus, ArrowDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,7 +38,11 @@ export function AddTaskModal({
   const [taskTitle, setTaskTitle] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const [taskDate, setTaskDate] = useState(selectedDate || new Date());
+  const [selectedPriority, setSelectedPriority] = useState("medium");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [dueTime, setDueTime] = useState("");
   const [showAddTag, setShowAddTag] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
   const modalRef = useRef(null);
@@ -100,7 +104,11 @@ export function AddTaskModal({
 
   const handleSubmit = () => {
     if (taskTitle.trim()) {
-      onAddTask(taskTitle.trim(), selectedTag || undefined, taskDate);
+      onAddTask(taskTitle.trim(), selectedTag || undefined, taskDate, {
+        priority: selectedPriority,
+        description: taskDescription,
+        dueTime,
+      });
       onClose();
     }
   };
@@ -377,6 +385,96 @@ export function AddTaskModal({
                 }
                 className="w-full border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3 px-4"
               />
+            </motion.div>
+
+            {/* Priority Selection */}
+            <motion.div variants={itemVariants} className="space-y-3">
+              <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                {t('addTask.priority')}
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { key: "high", label: t('addTask.priorityHigh'), icon: <ArrowUp className="h-4 w-4" /> },
+                  { key: "medium", label: t('addTask.priorityMedium'), icon: <Minus className="h-4 w-4" /> },
+                  { key: "low", label: t('addTask.priorityLow'), icon: <ArrowDown className="h-4 w-4" /> },
+                ].map((p) => (
+                  <motion.button
+                    key={p.key}
+                    onClick={() => setSelectedPriority(p.key)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-bold rounded-xl border-2 transition-all ${
+                      selectedPriority === p.key
+                        ? p.key === "high"
+                          ? "bg-red-50 border-red-400 text-red-600 dark:bg-red-900/20 dark:border-red-500 dark:text-red-400"
+                          : p.key === "medium"
+                          ? "bg-orange-50 border-orange-400 text-orange-600 dark:bg-orange-900/20 dark:border-orange-500 dark:text-orange-400"
+                          : "bg-green-50 border-green-400 text-green-600 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400"
+                        : "border-gray-300 text-gray-500 hover:border-gray-400 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500"
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {p.icon}
+                    {p.label}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Due Time */}
+            <motion.div variants={itemVariants} className="space-y-3">
+              <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                {t('addTask.dueTime')}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="time"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  className="flex-1 border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-2.5 px-4"
+                />
+                {dueTime && (
+                  <motion.button
+                    onClick={() => setDueTime("")}
+                    className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-bold"
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <X className="h-4 w-4" />
+                  </motion.button>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Description */}
+            <motion.div variants={itemVariants} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  {t('addTask.description')}
+                </label>
+                <motion.button
+                  onClick={() => setShowDescription(!showDescription)}
+                  className="text-xs text-primary font-bold"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {showDescription ? t('common.close') : `+ ${t('addTask.description')}`}
+                </motion.button>
+              </div>
+              <AnimatePresence>
+                {showDescription && (
+                  <motion.textarea
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    placeholder={t('addTask.descriptionPlaceholder')}
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                    rows={3}
+                    className="w-full border-2 border-gray-300 focus:border-primary/70 font-bold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-2.5 px-4 resize-none"
+                  />
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* Category Selection */}

@@ -47,11 +47,16 @@
     "importDesc": "从备份文件恢复",
     "resetApp": "重置优事空间",
     "resetDesc": "永久删除所有数据",
-    "version": "优事空间 PrioSpace V1.3.2",
+    "version": "优事空间 PrioSpace V1.3.3",
     "tagline": "专注 · 追踪 · 成就",
     "localizedBy": "汉化 by 迷汁逃桃",
     "language": "语言",
-    "languageDesc": "更改界面语言"
+    "languageDesc": "更改界面语言",
+    "backupSnapshots": "备份快照",
+    "restoreSnapshot": "恢复",
+    "deleteSnapshot": "删除",
+    "noSnapshots": "暂无快照",
+    "restoreConfirm": "确认恢复此快照？当前数据将被替换。"
   },
   "theme": {
     "default": { "name": "默认", "desc": "清新绿色氛围" },
@@ -117,7 +122,10 @@
     "dailyCompletion": "每日习惯完成 (1-5+)",
     "singleCompletion": "单个习惯完成",
     "daysDone": "{{count}} 天已达成",
-    "monthCompletions": "{{count}} 次总完成"
+    "monthCompletions": "{{count}} 次总完成",
+    "currentStreak": "当前连续",
+    "bestStreak": "最长连续",
+    "streakDays": "{{count}} 天"
   },
   "addTask": {
     "title": "新建任务",
@@ -129,7 +137,15 @@
     "newCategory": "新建分类",
     "categoryPlaceholder": "分类名称",
     "chooseColor": "选择颜色",
-    "createCategory": "创建分类"
+    "createCategory": "创建分类",
+    "priority": "优先级",
+    "priorityHigh": "高",
+    "priorityMedium": "中",
+    "priorityLow": "低",
+    "description": "备注",
+    "descriptionPlaceholder": "添加备注...",
+    "dueTime": "截止时间",
+    "noDueTime": "无截止时间"
   },
   "addSubtask": {
     "title": "新建子任务",
@@ -161,7 +177,11 @@
     "markComplete": "标记完成",
     "transferToday": "转移到今天",
     "deleteSubtask": "删除子任务",
-    "deleteTask": "删除任务"
+    "deleteTask": "删除任务",
+    "priority": "优先级",
+    "description": "备注",
+    "descriptionPlaceholder": "添加备注...",
+    "dueTime": "截止时间"
   },
   "timer": {
     "focusTimer": "专注计时器",
@@ -242,12 +262,51 @@
     "importSuccess": "数据导入成功！",
     "importError": "导入数据出错，请检查文件格式。",
     "timer": "计时器",
-    "habits": "习惯"
+    "habits": "习惯",
+    "search": "搜索",
+    "statistics": "统计",
+    "recurring": "循环"
   },
   "languages": {
     "zh-CN": "简体中文",
     "zh-TW": "繁體中文",
     "en": "English",
     "es": "Español"
+  },
+  "search": {
+    "title": "搜索任务",
+    "placeholder": "按标题搜索...",
+    "filterByTag": "按分类筛选",
+    "allTags": "全部分类",
+    "noResults": "未找到任务",
+    "results": "{{count}} 个结果"
+  },
+  "recurring": {
+    "title": "循环任务",
+    "addNew": "新建模板",
+    "titlePlaceholder": "任务标题",
+    "recurrence": "重复",
+    "daily": "每天",
+    "weekly": "每周",
+    "monthly": "每月",
+    "selectDays": "选择日期",
+    "noRecurringTasks": "暂无循环任务",
+    "deleteConfirm": "确认删除此循环任务模板？"
+  },
+  "statistics": {
+    "title": "统计",
+    "weekly": "7天",
+    "monthly": "30天",
+    "quarterly": "90天",
+    "completionRate": "完成率",
+    "totalFocusTime": "总专注时长",
+    "habitStreaks": "习惯连续",
+    "dailyCompletions": "每日完成数",
+    "focusByTag": "按分类专注",
+    "noData": "此期间暂无数据",
+    "exportImage": "导出为图片",
+    "currentStreak": "当前连续",
+    "bestStreak": "最长连续",
+    "days": "天"
   }
 }

@@ -47,11 +47,16 @@
     "importDesc": "Restaurar desde archivo de respaldo",
     "resetApp": "Reiniciar PrioSpace",
     "resetDesc": "Eliminar permanentemente todos los datos",
-    "version": "PrioSpace V1.3.2",
+    "version": "PrioSpace V1.3.3",
     "tagline": "Enfócate · Rastrea · Logra",
     "localizedBy": "Traducido por 迷汁逃桃",
     "language": "Idioma",
-    "languageDesc": "Cambiar idioma de la interfaz"
+    "languageDesc": "Cambiar idioma de la interfaz",
+    "backupSnapshots": "Instantáneas de respaldo",
+    "restoreSnapshot": "Restaurar",
+    "deleteSnapshot": "Eliminar",
+    "noSnapshots": "Sin instantáneas",
+    "restoreConfirm": "¿Restaurar esta instantánea? Los datos actuales serán reemplazados."
   },
   "theme": {
     "default": { "name": "Predeterminado", "desc": "Ambiente verde fresco" },
@@ -117,7 +122,10 @@
     "dailyCompletion": "Completions diarios (1-5+)",
     "singleCompletion": "Hábito individual completado",
     "daysDone": "{{count}} días completados",
-    "monthCompletions": "{{count}} completados en total"
+    "monthCompletions": "{{count}} completados en total",
+    "currentStreak": "Racha actual",
+    "bestStreak": "Mejor racha",
+    "streakDays": "{{count}} días"
   },
   "addTask": {
     "title": "Nueva tarea",
@@ -129,7 +137,15 @@
     "newCategory": "Nueva etiqueta",
     "categoryPlaceholder": "Nombre de etiqueta",
     "chooseColor": "Elegir color",
-    "createCategory": "Crear etiqueta"
+    "createCategory": "Crear etiqueta",
+    "priority": "Prioridad",
+    "priorityHigh": "Alta",
+    "priorityMedium": "Media",
+    "priorityLow": "Baja",
+    "description": "Notas",
+    "descriptionPlaceholder": "Agregar notas...",
+    "dueTime": "Hora límite",
+    "noDueTime": "Sin hora límite"
   },
   "addSubtask": {
     "title": "Nueva subtarea",
@@ -161,7 +177,11 @@
     "markComplete": "Marcar completada",
     "transferToday": "Mover a hoy",
     "deleteSubtask": "Eliminar subtarea",
-    "deleteTask": "Eliminar tarea"
+    "deleteTask": "Eliminar tarea",
+    "priority": "Prioridad",
+    "description": "Notas",
+    "descriptionPlaceholder": "Agregar notas...",
+    "dueTime": "Hora límite"
   },
   "timer": {
     "focusTimer": "Temporizador de enfoque",
@@ -242,7 +262,46 @@
     "importSuccess": "¡Datos importados exitosamente!",
     "importError": "Error al importar datos. Verifica el formato del archivo.",
     "timer": "Temporizador",
-    "habits": "Hábitos"
+    "habits": "Hábitos",
+    "search": "Buscar",
+    "statistics": "Estadísticas",
+    "recurring": "Recurrentes"
+  },
+  "search": {
+    "title": "Buscar tareas",
+    "placeholder": "Buscar por título...",
+    "filterByTag": "Filtrar por etiqueta",
+    "allTags": "Todas",
+    "noResults": "No se encontraron tareas",
+    "results": "{{count}} resultados"
+  },
+  "recurring": {
+    "title": "Tareas recurrentes",
+    "addNew": "Nueva plantilla",
+    "titlePlaceholder": "Título",
+    "recurrence": "Repetir",
+    "daily": "Diario",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "selectDays": "Seleccionar días",
+    "noRecurringTasks": "Sin tareas recurrentes",
+    "deleteConfirm": "¿Eliminar esta plantilla?"
+  },
+  "statistics": {
+    "title": "Estadísticas",
+    "weekly": "7 días",
+    "monthly": "30 días",
+    "quarterly": "90 días",
+    "completionRate": "Tasa de completitud",
+    "totalFocusTime": "Tiempo de enfoque total",
+    "habitStreaks": "Rachas de hábitos",
+    "dailyCompletions": "Completados diarios",
+    "focusByTag": "Enfoque por etiqueta",
+    "noData": "Sin datos en este período",
+    "exportImage": "Exportar como imagen",
+    "currentStreak": "Racha actual",
+    "bestStreak": "Mejor racha",
+    "days": "días"
   },
   "languages": {
     "zh-CN": "简体中文",

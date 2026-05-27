@@ -47,11 +47,16 @@
     "importDesc": "Restore from backup file",
     "resetApp": "Reset PrioSpace",
     "resetDesc": "Permanently delete all data",
-    "version": "PrioSpace V1.3.2",
+    "version": "PrioSpace V1.3.3",
     "tagline": "Focus · Track · Achieve",
     "localizedBy": "Localized by 迷汁逃桃",
     "language": "Language",
-    "languageDesc": "Change interface language"
+    "languageDesc": "Change interface language",
+    "backupSnapshots": "Backup Snapshots",
+    "restoreSnapshot": "Restore",
+    "deleteSnapshot": "Delete",
+    "noSnapshots": "No snapshots",
+    "restoreConfirm": "Restore this snapshot? Current data will be replaced."
   },
   "theme": {
     "default": { "name": "Default", "desc": "Fresh green vibe" },
@@ -117,7 +122,10 @@
     "dailyCompletion": "Daily habit completions (1-5+)",
     "singleCompletion": "Single habit completion",
     "daysDone": "{{count}} days completed",
-    "monthCompletions": "{{count}} total completions"
+    "monthCompletions": "{{count}} total completions",
+    "currentStreak": "Current Streak",
+    "bestStreak": "Best Streak",
+    "streakDays": "{{count}} days"
   },
   "addTask": {
     "title": "New Task",
@@ -129,7 +137,15 @@
     "newCategory": "New Tag",
     "categoryPlaceholder": "Tag name",
     "chooseColor": "Choose color",
-    "createCategory": "Create Tag"
+    "createCategory": "Create Tag",
+    "priority": "Priority",
+    "priorityHigh": "High",
+    "priorityMedium": "Medium",
+    "priorityLow": "Low",
+    "description": "Notes",
+    "descriptionPlaceholder": "Add notes...",
+    "dueTime": "Due Time",
+    "noDueTime": "No due time"
   },
   "addSubtask": {
     "title": "New Subtask",
@@ -161,7 +177,11 @@
     "markComplete": "Mark Complete",
     "transferToday": "Move to Today",
     "deleteSubtask": "Delete Subtask",
-    "deleteTask": "Delete Task"
+    "deleteTask": "Delete Task",
+    "priority": "Priority",
+    "description": "Notes",
+    "descriptionPlaceholder": "Add notes...",
+    "dueTime": "Due Time"
   },
   "timer": {
     "focusTimer": "Focus Timer",
@@ -242,7 +262,46 @@
     "importSuccess": "Data imported successfully!",
     "importError": "Error importing data. Please check the file format.",
     "timer": "Timer",
-    "habits": "Habits"
+    "habits": "Habits",
+    "search": "Search",
+    "statistics": "Statistics",
+    "recurring": "Recurring"
+  },
+  "search": {
+    "title": "Search Tasks",
+    "placeholder": "Search by title...",
+    "filterByTag": "Filter by tag",
+    "allTags": "All Tags",
+    "noResults": "No tasks found",
+    "results": "{{count}} results"
+  },
+  "recurring": {
+    "title": "Recurring Tasks",
+    "addNew": "Add Template",
+    "titlePlaceholder": "Task title",
+    "recurrence": "Repeat",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "selectDays": "Select days",
+    "noRecurringTasks": "No recurring tasks yet",
+    "deleteConfirm": "Delete this recurring task template?"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "weekly": "7 Days",
+    "monthly": "30 Days",
+    "quarterly": "90 Days",
+    "completionRate": "Completion Rate",
+    "totalFocusTime": "Total Focus Time",
+    "habitStreaks": "Habit Streaks",
+    "dailyCompletions": "Daily Completions",
+    "focusByTag": "Focus by Tag",
+    "noData": "No data for this period",
+    "exportImage": "Export as Image",
+    "currentStreak": "Current Streak",
+    "bestStreak": "Best Streak",
+    "days": "days"
   },
   "languages": {
     "zh-CN": "简体中文",

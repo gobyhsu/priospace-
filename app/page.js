@@ -1,12 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DayNightCycle, AnimatedNumber } from "@/components/day-night-cycle";
 import { AnimatedYear } from "@/components/animated-year";
 import { WeeklyCalendar } from "@/components/weekly-calender";
 import { TaskList } from "@/components/task-list";
-import { Timer, Plus, BarChart3, Settings, CheckCircle, AlertCircle, ChevronDown } from "lucide-react";
+import { Timer, Plus, BarChart3, Settings, CheckCircle, AlertCircle, ChevronDown, Search, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddTaskModal } from "@/components/add-task-modal";
 import { TaskOptionsModal } from "@/components/task-options-modal";
@@ -16,6 +16,9 @@ import { TimerModal } from "@/components/timer-modal";
 import { SettingsModal } from "@/components/settings-modal";
 import { IntroScreen } from "@/components/intro-screen";
 import { WebRTCShareModal } from "@/components/webrtc-share-modal";
+import { SearchModal } from "@/components/search-modal";
+import { RecurringTasksModal } from "@/components/recurring-tasks-modal";
+import { StatisticsModal } from "@/components/statistics-modal";
 import {
   geocodeCity,
   reverseGeocode,
@@ -28,6 +31,7 @@ import {
 } from "@/utils/weather";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
+import { saveSnapshot } from "@/lib/backup";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -36,6 +40,10 @@ export default function Home() {
   const [dailyTasks, setDailyTasks] = useState({});
   const [customTags, setCustomTags] = useState([]);
   const [habits, setHabits] = useState([]);
+  const [recurringTasks, setRecurringTasks] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
+  const [showRecurringTasksModal, setShowRecurringTasksModal] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
   const [timerMinimized, setTimerMinimized] = useState(false);
   const [timerIndicator, setTimerIndicator] = useState(null); // { isBreak, isOvertime, taskTitle, timeLeft, overtimeSeconds }
@@ -115,7 +123,6 @@ export default function Home() {
       const converted = {};
       Object.keys(parsed).forEach((dateKey) => {
         converted[dateKey] = parsed[dateKey].map((task) => {
-          // Ensure subtasks are properly structured
           const processedSubtasks = (task.subtasks || []).map((subtask) => ({
             ...subtask,
             createdAt: new Date(subtask.createdAt || task.createdAt),
@@ -123,7 +130,11 @@ export default function Home() {
             timeSpent: subtask.timeSpent || 0,
             completed: !!subtask.completed,
             parentTaskId: task.id,
-            subtasks: [], // Subtasks don't have their own subtasks
+            subtasks: [],
+            priority: subtask.priority || "medium",
+            description: subtask.description || "",
+            dueTime: subtask.dueTime || "",
+            order: subtask.order ?? 0,
           }));
 
           return {
@@ -134,11 +145,18 @@ export default function Home() {
             completed: !!task.completed,
             subtasks: processedSubtasks,
             subtasksExpanded: task.subtasksExpanded || false,
+            priority: task.priority || "medium",
+            description: task.description || "",
+            dueTime: task.dueTime || "",
+            order: task.order ?? 0,
           };
         });
       });
       setDailyTasks(converted);
     }
+
+    // Set schema version
+    localStorage.setItem("schemaVersion", "4");
 
     const savedCustomTags = localStorage.getItem("customTags");
     if (savedCustomTags) {
@@ -148,6 +166,11 @@ export default function Home() {
     const savedHabits = localStorage.getItem("habits");
     if (savedHabits) {
       setHabits(JSON.parse(savedHabits));
+    }
+
+    const savedRecurringTasks = localStorage.getItem("recurringTasks");
+    if (savedRecurringTasks) {
+      setRecurringTasks(JSON.parse(savedRecurringTasks));
     }
 
     // Load weather data
@@ -249,6 +272,14 @@ export default function Home() {
             event.preventDefault();
             setShowSettings(true);
             break;
+          case "f": // Ctrl/Cmd + F for Search
+            event.preventDefault();
+            setShowSearch(true);
+            break;
+          case "s": // Ctrl/Cmd + S for Statistics
+            event.preventDefault();
+            setShowStatistics(true);
+            break;
           default:
             break;
         }
@@ -292,6 +323,64 @@ export default function Home() {
     localStorage.setItem("habits", JSON.stringify(habits));
   }, [habits]);
 
+  useEffect(() => {
+    localStorage.setItem("recurringTasks", JSON.stringify(recurringTasks));
+  }, [recurringTasks]);
+
+  // Auto-generate recurring tasks for the selected date
+  useEffect(() => {
+    if (recurringTasks.length === 0) return;
+    const dateString = getDateString(selectedDate);
+    setDailyTasks((prev) => {
+      const existingTasks = prev[dateString] || [];
+      const existingRecurringIds = new Set(
+        existingTasks.filter((t) => t.recurringTaskId).map((t) => t.recurringTaskId)
+      );
+      const dayOfWeek = selectedDate.getDay();
+      const dayOfMonth = selectedDate.getDate();
+      const newTasks = recurringTasks
+        .filter((rt) => {
+          if (existingRecurringIds.has(rt.id)) return false;
+          if (rt.recurrence.type === "daily") return true;
+          if (rt.recurrence.type === "weekly")
+            return (rt.recurrence.days || []).includes(dayOfWeek);
+          if (rt.recurrence.type === "monthly")
+            return (rt.recurrence.days || []).includes(dayOfMonth);
+          return false;
+        })
+        .map((rt) => ({
+          id: `recurring-${rt.id}-${dateString}`,
+          title: rt.title,
+          completed: false,
+          timeSpent: 0,
+          focusTime: 0,
+          createdAt: selectedDate,
+          tag: rt.tag,
+          subtasks: [],
+          subtasksExpanded: false,
+          priority: rt.priority || "medium",
+          description: rt.description || "",
+          dueTime: rt.dueTime || "",
+          order: 0,
+          recurringTaskId: rt.id,
+        }));
+      if (newTasks.length === 0) return prev;
+      return { ...prev, [dateString]: [...existingTasks, ...newTasks] };
+    });
+  }, [recurringTasks, selectedDate]);
+
+  // Auto-save backup snapshots (debounced)
+  const snapshotTimerRef = useRef(null);
+  useEffect(() => {
+    if (snapshotTimerRef.current) clearTimeout(snapshotTimerRef.current);
+    snapshotTimerRef.current = setTimeout(() => {
+      saveSnapshot({ dailyTasks, customTags, habits, darkMode, theme });
+    }, 3000);
+    return () => {
+      if (snapshotTimerRef.current) clearTimeout(snapshotTimerRef.current);
+    };
+  }, [dailyTasks, customTags, habits]);
+
   const getDateString = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -316,8 +405,48 @@ export default function Home() {
       isHabit: true,
       habitId: habit.id,
       tag: habit.tag,
-      subtasks: [], // Habits don't have subtasks
+      subtasks: [],
+      priority: "medium",
+      description: "",
+      dueTime: "",
     }));
+  };
+
+  const generateRecurringTasks = (recurringTasks, selectedDate, dailyTasks) => {
+    const dateString = getDateString(selectedDate);
+    const dayOfWeek = selectedDate.getDay(); // 0=Sun, 1=Mon, ...
+    const dayOfMonth = selectedDate.getDate();
+    const existingTasks = dailyTasks[dateString] || [];
+    const existingRecurringIds = new Set(
+      existingTasks.filter((t) => t.recurringTaskId).map((t) => t.recurringTaskId)
+    );
+
+    return recurringTasks
+      .filter((rt) => {
+        if (existingRecurringIds.has(rt.id)) return false;
+        if (rt.recurrence.type === "daily") return true;
+        if (rt.recurrence.type === "weekly")
+          return (rt.recurrence.days || []).includes(dayOfWeek);
+        if (rt.recurrence.type === "monthly")
+          return (rt.recurrence.days || []).includes(dayOfMonth);
+        return false;
+      })
+      .map((rt) => ({
+        id: `recurring-${rt.id}-${dateString}`,
+        title: rt.title,
+        completed: false,
+        timeSpent: 0,
+        focusTime: 0,
+        createdAt: selectedDate,
+        tag: rt.tag,
+        subtasks: [],
+        subtasksExpanded: false,
+        priority: rt.priority || "medium",
+        description: rt.description || "",
+        dueTime: rt.dueTime || "",
+        order: 0,
+        recurringTaskId: rt.id,
+      }));
   };
 
   const importDataFromWebRTC = (data) => {
@@ -720,7 +849,7 @@ export default function Home() {
     }
   };
 
-  const addTask = (title, tagId, taskDate = selectedDate) => {
+  const addTask = (title, tagId, taskDate = selectedDate, options = {}) => {
     const dateString = getDateString(taskDate);
     const currentTasks = dailyTasks[dateString] || [];
     const newTask = {
@@ -731,8 +860,12 @@ export default function Home() {
       focusTime: 0,
       createdAt: taskDate,
       tag: tagId,
-      subtasks: [], // Initialize empty subtasks array
-      subtasksExpanded: false, // Initialize expansion state
+      subtasks: [],
+      subtasksExpanded: false,
+      priority: options.priority || "medium",
+      description: options.description || "",
+      dueTime: options.dueTime || "",
+      order: currentTasks.length,
     };
     setDailyTasks({ ...dailyTasks, [dateString]: [...currentTasks, newTask] });
   };
@@ -750,7 +883,11 @@ export default function Home() {
       createdAt: selectedDate,
       tag: tagId,
       parentTaskId,
-      subtasks: [], // Subtasks can't have their own subtasks
+      subtasks: [],
+      priority: "medium",
+      description: "",
+      dueTime: "",
+      order: 0,
     };
 
     const updatedTasks = currentTasks.map((task) => {
@@ -990,10 +1127,12 @@ export default function Home() {
       dailyTasks,
       customTags,
       habits,
+      recurringTasks,
       darkMode,
       theme,
       exportDate: new Date().toISOString(),
-      version: "3.0", // Update version for subtasks support
+      version: "4.0",
+      schemaVersion: 4,
     };
     const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -1008,7 +1147,7 @@ export default function Home() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    setShowSettings(false); // Close settings after export
+    setShowSettings(false);
   };
 
   const importData = () => {
@@ -1022,24 +1161,32 @@ export default function Home() {
         reader.onload = (e) => {
           try {
             const data = JSON.parse(e.target?.result);
-            if (data.dailyTasks) {
-              // Convert date strings back to Date objects and ensure backward compatibility
+            const dailyTasks = data.dailyTasks || {};
+            const recurringTasksData = data.recurringTasks || [];
+            if (dailyTasks && Object.keys(dailyTasks).length > 0) {
               const converted = {};
-              Object.keys(data.dailyTasks).forEach((dateKey) => {
-                converted[dateKey] = data.dailyTasks[dateKey].map((task) => ({
+              Object.keys(dailyTasks).forEach((dateKey) => {
+                converted[dateKey] = dailyTasks[dateKey].map((task) => ({
                   ...task,
                   createdAt: new Date(task.createdAt),
-                  focusTime: task.focusTime || 0, // Ensure focusTime exists
-                  subtasks: task.subtasks || [], // Ensure subtasks array exists
-                  subtasksExpanded: task.subtasksExpanded || false, // Ensure expansion state exists
-                  // For subtasks, ensure they have the required fields
+                  focusTime: task.focusTime || 0,
+                  subtasks: task.subtasks || [],
+                  subtasksExpanded: task.subtasksExpanded || false,
+                  priority: task.priority || "medium",
+                  description: task.description || "",
+                  dueTime: task.dueTime || "",
+                  order: task.order ?? 0,
                   ...(task.subtasks && {
                     subtasks: task.subtasks.map((subtask) => ({
                       ...subtask,
                       createdAt: new Date(subtask.createdAt || task.createdAt),
                       focusTime: subtask.focusTime || 0,
                       timeSpent: subtask.timeSpent || 0,
-                      subtasks: [], // Subtasks don't have their own subtasks
+                      subtasks: [],
+                      priority: subtask.priority || "medium",
+                      description: subtask.description || "",
+                      dueTime: subtask.dueTime || "",
+                      order: subtask.order ?? 0,
                     })),
                   }),
                 }));
@@ -1048,10 +1195,11 @@ export default function Home() {
             }
             if (data.customTags) setCustomTags(data.customTags);
             if (data.habits) setHabits(data.habits);
+            if (recurringTasksData.length > 0) setRecurringTasks(recurringTasksData);
             if (typeof data.darkMode === "boolean") setDarkMode(data.darkMode);
             if (data.theme) setTheme(data.theme);
             alert(t('page.importSuccess'));
-            setShowSettings(false); // Close settings after import
+            setShowSettings(false);
           } catch (error) {
             alert(t('page.importError'));
           }
@@ -1114,6 +1262,37 @@ export default function Home() {
     );
   };
 
+  const addRecurringTask = (title, tag, priority, recurrence, description, dueTime) => {
+    const newRecurring = {
+      id: Date.now().toString(),
+      title,
+      tag: tag || undefined,
+      priority: priority || "medium",
+      description: description || "",
+      dueTime: dueTime || "",
+      recurrence,
+    };
+    setRecurringTasks((prev) => [...prev, newRecurring]);
+  };
+
+  const deleteRecurringTask = (id) => {
+    setRecurringTasks((prev) => prev.filter((rt) => rt.id !== id));
+  };
+
+  const reorderTasks = (newOrder) => {
+    const dateString = getDateString(selectedDate);
+    const orderMap = {};
+    newOrder.forEach((task, index) => {
+      orderMap[task.id] = index;
+    });
+    const currentTasks = getCurrentDayTasks();
+    const updatedTasks = currentTasks.map((task) => ({
+      ...task,
+      order: orderMap[task.id] !== undefined ? orderMap[task.id] : task.order,
+    }));
+    setDailyTasks({ ...dailyTasks, [dateString]: updatedTasks });
+  };
+
   const resetApp = () => {
     localStorage.clear();
     setDailyTasks({});
@@ -1137,8 +1316,9 @@ export default function Home() {
 
   const dailyHabitTasks = generateDailyHabitTasks(habits, selectedDate);
   const regularTasks = getCurrentDayTasks();
-  const allTasks = [...regularTasks, ...dailyHabitTasks];
-  const flatTaskList = createFlatTaskList(allTasks); // For timer and other components
+  const recurringGenerated = generateRecurringTasks(recurringTasks, selectedDate, dailyTasks);
+  const allTasks = [...regularTasks, ...recurringGenerated, ...dailyHabitTasks];
+  const flatTaskList = createFlatTaskList(allTasks);
 
   // Compute past incomplete tasks (excluding today, excluding habits)
   const todayStr = getDateString(new Date());
@@ -1336,6 +1516,15 @@ export default function Home() {
               <div className="p-4 border-t border-dashed absolute bottom-0 left-1/2 -translate-x-1/2 bg-background/70 backdrop-blur-sm w-full z-50">
                 <div className="flex items-center justify-between">
                   <Button
+                    onClick={() => setShowSearch(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center justify-center gap-1 font-extrabold hover:bg-accent/50 group dark:text-white px-2"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+
+                  <Button
                     onClick={() => setShowTimer(true)}
                     variant="ghost"
                     size="lg"
@@ -1350,7 +1539,7 @@ export default function Home() {
                   <Button
                     onClick={() => setShowAddTask(true)}
                     size="lg"
-                    className="mx-4 rounded-full w-12 h-12 px-4 sm:px-8 bg-primary hover:bg-primary/90 group hover:scale-110 transition-transform [&_svg]:size-5"
+                    className="mx-2 rounded-full w-12 h-12 px-4 sm:px-8 bg-primary hover:bg-primary/90 group hover:scale-110 transition-transform [&_svg]:size-5"
                   >
                     <Plus className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   </Button>
@@ -1365,6 +1554,15 @@ export default function Home() {
                       <BarChart3 className="h-5 w-5" />
                       <span>{t('page.habits')}</span>
                     </div>
+                  </Button>
+
+                  <Button
+                    onClick={() => setShowStatistics(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center justify-center gap-1 font-extrabold hover:bg-accent/50 group dark:text-white px-2"
+                  >
+                    <BarChart3 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -1545,6 +1743,16 @@ export default function Home() {
                   </Button>
 
                   <Button
+                    onClick={() => setShowSearch(true)}
+                    variant="outline"
+                    size="lg"
+                    className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
+                  >
+                    <Search className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    <span className="font-extrabold">{t('page.search')}</span>
+                  </Button>
+
+                  <Button
                     onClick={() => setShowTimer(true)}
                     variant="outline"
                     size="lg"
@@ -1563,14 +1771,34 @@ export default function Home() {
                     <BarChart3 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
                     <span className="font-extrabold">{t('page.habits')}</span>
                   </Button>
+
+                  <Button
+                    onClick={() => setShowRecurringTasksModal(true)}
+                    variant="outline"
+                    size="lg"
+                    className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
+                  >
+                    <Repeat className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    <span className="font-extrabold">{t('page.recurring')}</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => setShowStatistics(true)}
+                    variant="outline"
+                    size="lg"
+                    className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
+                  >
+                    <BarChart3 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    <span className="font-extrabold">{t('page.statistics')}</span>
+                  </Button>
                 </div>
 
                 {/* Keyboard shortcuts hint */}
                 <div className="p-6 pt-0 text-[10px] text-muted-foreground font-extrabold space-y-1 opacity-70">
                   <div>⌘/Ctrl + A → {t("addTask.addTask")}</div>
+                  <div>⌘/Ctrl + F → {t("page.search")}</div>
                   <div>⌘/Ctrl + C → {t("page.timer")}</div>
                   <div>⌘/Ctrl + H → {t("page.habits")}</div>
-                  <div>⌘/Ctrl + X → {t("settings.title")}</div>
                   <div>Esc → {t("common.close")}</div>
                 </div>
               </motion.div>
@@ -1691,6 +1919,39 @@ export default function Home() {
                 onClose={() => setShowHabits(false)}
                 onUpdateHabits={setHabits}
                 onAddCustomTag={addCustomTag}
+              />
+            )}
+
+            {showSearch && (
+              <SearchModal
+                dailyTasks={dailyTasks}
+                customTags={customTags}
+                onClose={() => setShowSearch(false)}
+                onTaskSelect={(task) => {
+                  setShowSearch(false);
+                  setSelectedTask(task);
+                  setShowTaskOptions(true);
+                }}
+              />
+            )}
+
+            {showRecurringTasksModal && (
+              <RecurringTasksModal
+                recurringTasks={recurringTasks}
+                customTags={customTags}
+                onClose={() => setShowRecurringTasksModal(false)}
+                onAddRecurringTask={addRecurringTask}
+                onDeleteRecurringTask={deleteRecurringTask}
+                onAddCustomTag={addCustomTag}
+              />
+            )}
+
+            {showStatistics && (
+              <StatisticsModal
+                dailyTasks={dailyTasks}
+                customTags={customTags}
+                habits={habits}
+                onClose={() => setShowStatistics(false)}
               />
             )}
           </AnimatePresence>

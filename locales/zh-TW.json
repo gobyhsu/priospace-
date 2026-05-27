@@ -47,11 +47,16 @@
     "importDesc": "從備份檔案還原",
     "resetApp": "重設優事空間",
     "resetDesc": "永久刪除所有資料",
-    "version": "優事空間 PrioSpace V1.3.2",
+    "version": "優事空間 PrioSpace V1.3.3",
     "tagline": "專注 · 追蹤 · 成就",
     "localizedBy": "中文化 by 迷汁逃桃",
     "language": "語言",
-    "languageDesc": "更改介面語言"
+    "languageDesc": "更改介面語言",
+    "backupSnapshots": "備份快照",
+    "restoreSnapshot": "恢復",
+    "deleteSnapshot": "刪除",
+    "noSnapshots": "暫無快照",
+    "restoreConfirm": "確認恢復此快照？當前數據將被替換。"
   },
   "theme": {
     "default": { "name": "預設", "desc": "清新綠色氛圍" },
@@ -117,7 +122,10 @@
     "dailyCompletion": "每日習慣完成 (1-5+)",
     "singleCompletion": "單個習慣完成",
     "daysDone": "{{count}} 天已達成",
-    "monthCompletions": "{{count}} 次總完成"
+    "monthCompletions": "{{count}} 次總完成",
+    "currentStreak": "目前連續",
+    "bestStreak": "最長連續",
+    "streakDays": "{{count}} 天"
   },
   "addTask": {
     "title": "新建任務",
@@ -129,7 +137,15 @@
     "newCategory": "新建分類",
     "categoryPlaceholder": "分類名稱",
     "chooseColor": "選擇顏色",
-    "createCategory": "建立分類"
+    "createCategory": "建立分類",
+    "priority": "優先級",
+    "priorityHigh": "高",
+    "priorityMedium": "中",
+    "priorityLow": "低",
+    "description": "備註",
+    "descriptionPlaceholder": "新增備註...",
+    "dueTime": "截止時間",
+    "noDueTime": "無截止時間"
   },
   "addSubtask": {
     "title": "新建子任務",
@@ -161,7 +177,11 @@
     "markComplete": "標記完成",
     "transferToday": "轉移到今天",
     "deleteSubtask": "刪除子任務",
-    "deleteTask": "刪除任務"
+    "deleteTask": "刪除任務",
+    "priority": "優先級",
+    "description": "備註",
+    "descriptionPlaceholder": "新增備註...",
+    "dueTime": "截止時間"
   },
   "timer": {
     "focusTimer": "專注計時器",
@@ -242,7 +262,46 @@
     "importSuccess": "資料匯入成功！",
     "importError": "匯入資料出錯，請檢查檔案格式。",
     "timer": "計時器",
-    "habits": "習慣"
+    "habits": "習慣",
+    "search": "搜尋",
+    "statistics": "統計",
+    "recurring": "循環"
+  },
+  "search": {
+    "title": "搜尋任務",
+    "placeholder": "按標題搜尋...",
+    "filterByTag": "按分類篩選",
+    "allTags": "全部分類",
+    "noResults": "未找到任務",
+    "results": "{{count}} 個結果"
+  },
+  "recurring": {
+    "title": "循環任務",
+    "addNew": "新建模板",
+    "titlePlaceholder": "任務標題",
+    "recurrence": "重複",
+    "daily": "每天",
+    "weekly": "每週",
+    "monthly": "每月",
+    "selectDays": "選擇日期",
+    "noRecurringTasks": "暫無循環任務",
+    "deleteConfirm": "確認刪除此循環任務模板？"
+  },
+  "statistics": {
+    "title": "統計",
+    "weekly": "7天",
+    "monthly": "30天",
+    "quarterly": "90天",
+    "completionRate": "完成率",
+    "totalFocusTime": "總專注時長",
+    "habitStreaks": "習慣連續",
+    "dailyCompletions": "每日完成數",
+    "focusByTag": "按分類專注",
+    "noData": "此期間暫無數據",
+    "exportImage": "匯出為圖片",
+    "currentStreak": "目前連續",
+    "bestStreak": "最長連續",
+    "days": "天"
   },
   "languages": {
     "zh-CN": "簡體中文",

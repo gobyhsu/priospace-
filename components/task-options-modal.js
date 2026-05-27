@@ -16,6 +16,11 @@ import {
   List,
   ChevronRight,
   Calendar,
+  ArrowUp,
+  Minus,
+  ArrowDown,
+  Clock,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +67,9 @@ export function TaskOptionsModal({
   const [taskDate, setTaskDate] = useState(task.createdAt || new Date());
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
   const [showSubtasks, setShowSubtasks] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState(task.priority || "medium");
+  const [editDescription, setEditDescription] = useState(task.description || "");
+  const [editDueTime, setEditDueTime] = useState(task.dueTime || "");
   const modalRef = useRef(null);
   const { t } = useTranslation();
 
@@ -497,6 +505,99 @@ export function TaskOptionsModal({
                     handleDateChange(parseDateFromInput(e.target.value))
                   }
                   className="w-full border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-3 px-4"
+                />
+              </motion.div>
+            )}
+
+            {/* Priority */}
+            {!task.isHabit && (
+              <motion.div variants={itemVariants} className="space-y-3">
+                <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                  {t('taskOptions.priority')}
+                </label>
+                <div className="flex gap-2">
+                  {[
+                    { key: "high", label: t('addTask.priorityHigh'), icon: <ArrowUp className="h-4 w-4" /> },
+                    { key: "medium", label: t('addTask.priorityMedium'), icon: <Minus className="h-4 w-4" /> },
+                    { key: "low", label: t('addTask.priorityLow'), icon: <ArrowDown className="h-4 w-4" /> },
+                  ].map((p) => (
+                    <motion.button
+                      key={p.key}
+                      onClick={() => {
+                        setSelectedPriority(p.key);
+                        onUpdateTask(task.id, { priority: p.key });
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-bold rounded-xl border-2 transition-all ${
+                        selectedPriority === p.key
+                          ? p.key === "high"
+                            ? "bg-red-50 border-red-400 text-red-600 dark:bg-red-900/20 dark:border-red-500 dark:text-red-400"
+                            : p.key === "medium"
+                            ? "bg-orange-50 border-orange-400 text-orange-600 dark:bg-orange-900/20 dark:border-orange-500 dark:text-orange-400"
+                            : "bg-green-50 border-green-400 text-green-600 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400"
+                          : "border-gray-300 text-gray-500 hover:border-gray-400 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500"
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {p.icon}
+                      {p.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Due Time */}
+            {!task.isHabit && (
+              <motion.div variants={itemVariants} className="space-y-3">
+                <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  {t('taskOptions.dueTime')}
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={editDueTime}
+                    onChange={(e) => {
+                      setEditDueTime(e.target.value);
+                      onUpdateTask(task.id, { dueTime: e.target.value });
+                    }}
+                    className="flex-1 border-2 border-gray-300 focus:border-primary/70 font-extrabold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-2.5 px-4"
+                  />
+                  {editDueTime && (
+                    <motion.button
+                      onClick={() => {
+                        setEditDueTime("");
+                        onUpdateTask(task.id, { dueTime: "" });
+                      }}
+                      className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-bold"
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <X className="h-4 w-4" />
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Description */}
+            {!task.isHabit && (
+              <motion.div variants={itemVariants} className="space-y-3">
+                <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  {t('taskOptions.description')}
+                </label>
+                <textarea
+                  placeholder={t('taskOptions.descriptionPlaceholder')}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  onBlur={() => {
+                    if (editDescription !== (task.description || "")) {
+                      onUpdateTask(task.id, { description: editDescription });
+                    }
+                  }}
+                  rows={3}
+                  className="w-full border-2 border-gray-300 focus:border-primary/70 font-bold dark:border-gray-600 dark:focus:border-primary/80 dark:bg-gray-800 dark:text-gray-100 rounded-xl py-2.5 px-4 resize-none"
                 />
               </motion.div>
             )}

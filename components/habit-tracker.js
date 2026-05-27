@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
+import { calculateStreak } from "@/lib/statistics";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -13,6 +14,7 @@ import {
   RotateCcw,
   Check,
   Trash2,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -653,6 +655,24 @@ export function HabitTracker({
                             </span>
                           </div>
                         )}
+                        {currentHabit && (() => {
+                          const streak = calculateStreak(currentHabit.completedDates);
+                          return streak.current > 0 || streak.best > 0 ? (
+                            <div className="flex items-center justify-center gap-3 mt-2">
+                              {streak.current > 0 && (
+                                <div className="flex items-center gap-1 text-xs font-bold">
+                                  <Flame className="h-3.5 w-3.5 text-orange-500" />
+                                  <span className="text-orange-500">{streak.current}{t('habit.streakDays', { count: '' })}</span>
+                                </div>
+                              )}
+                              {streak.best > 0 && (
+                                <div className="flex items-center gap-1 text-xs font-bold text-gray-400">
+                                  <span>{t('habit.bestStreak')} {streak.best}{t('habit.streakDays', { count: '' })}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : null;
+                        })()}
                       </>
                     )}
                   </div>

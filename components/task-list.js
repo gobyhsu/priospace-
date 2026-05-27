@@ -132,16 +132,23 @@ export function TaskList({
   const regularTasks = mainTasks.filter((task) => !task.isHabit);
   const habitTasks = mainTasks.filter((task) => task.isHabit);
 
-  // Sort tasks: incomplete first, then completed
-  const sortTasksByCompletion = (taskList) => {
+  // Sort tasks: incomplete first, then by priority, then by dueTime
+  const sortTasks = (taskList) => {
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
     return [...taskList].sort((a, b) => {
-      if (a.completed === b.completed) return 0;
-      return a.completed ? 1 : -1;
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const pa = priorityOrder[a.priority] ?? 1;
+      const pb = priorityOrder[b.priority] ?? 1;
+      if (pa !== pb) return pa - pb;
+      if (a.dueTime && b.dueTime) return a.dueTime.localeCompare(b.dueTime);
+      if (a.dueTime) return -1;
+      if (b.dueTime) return 1;
+      return (a.order ?? 0) - (b.order ?? 0);
     });
   };
 
-  const sortedRegularTasks = sortTasksByCompletion(regularTasks);
-  const sortedHabitTasks = sortTasksByCompletion(habitTasks);
+  const sortedRegularTasks = sortTasks(regularTasks);
+  const sortedHabitTasks = sortTasks(habitTasks);
 
   // Animation variants
   const containerVariants = {
@@ -409,8 +416,9 @@ function TaskItem({
 
   // Sort subtasks: incomplete first, then completed
   const sortedSubtasks = [...subtasks].sort((a, b) => {
-    if (a.completed === b.completed) return 0;
-    return a.completed ? 1 : -1;
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    return (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1);
   });
 
   // Calculate proper indentation - only apply to parent tasks with subtasks
@@ -480,6 +488,25 @@ function TaskItem({
                     {completedSubtasks}/{subtasks.length}
                   </motion.div>
                 )}
+
+                {/* Priority badge */}
+                {task.priority && task.priority !== "medium" && (
+                  <span className={`px-1.5 py-0.5 text-[10px] font-black rounded ${
+                    task.priority === "high"
+                      ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                      : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                  }`}>
+                    {task.priority === "high" ? "H" : "L"}
+                  </span>
+                )}
+
+                {/* Due time badge */}
+                {task.dueTime && (
+                  <span className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500 font-bold">
+                    <Clock className="h-3 w-3" />
+                    {task.dueTime}
+                  </span>
+                )}
               </div>
 
               <motion.span
@@ -504,6 +531,12 @@ function TaskItem({
                     </span>
                   </div>
                 </div>
+              )}
+
+              {task.description && !task.completed && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                  {task.description}
+                </p>
               )}
             </div>
           </div>

@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
+import { getSnapshots, restoreSnapshot, deleteSnapshot } from "@/lib/backup";
 
 export function SettingsModal({
   onClose,
@@ -913,6 +914,14 @@ export function SettingsModal({
               </div>
             </motion.div>
 
+            {/* Backup Snapshots */}
+            <motion.div variants={itemVariants} className="space-y-3">
+              <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                {t('settings.backupSnapshots')}
+              </label>
+              <BackupSnapshots />
+            </motion.div>
+
             {/* App Info */}
             <motion.div
               variants={itemVariants}
@@ -994,5 +1003,76 @@ export function SettingsModal({
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+function BackupSnapshots() {
+  const { t } = useTranslation();
+  const [snapshots, setSnapshots] = useState([]);
+
+  useEffect(() => {
+    setSnapshots(getSnapshots());
+  }, []);
+
+  const handleRestore = (index) => {
+    const data = restoreSnapshot(index);
+    if (!data) return;
+    if (window.confirm(t('settings.restoreConfirm'))) {
+      // Re-import the snapshot data by triggering localStorage directly
+      if (data.dailyTasks) localStorage.setItem("dailyTasks", JSON.stringify(data.dailyTasks));
+      if (data.customTags) localStorage.setItem("customTags", JSON.stringify(data.customTags));
+      if (data.habits) localStorage.setItem("habits", JSON.stringify(data.habits));
+      if (typeof data.darkMode === "boolean") localStorage.setItem("darkMode", JSON.stringify(data.darkMode));
+      if (data.theme) localStorage.setItem("theme", data.theme);
+      window.location.reload();
+    }
+  };
+
+  const handleDelete = (index) => {
+    deleteSnapshot(index);
+    setSnapshots(getSnapshots());
+  };
+
+  if (snapshots.length === 0) {
+    return (
+      <div className="text-sm text-gray-400 dark:text-gray-500 font-bold py-2">
+        {t('settings.noSnapshots')}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {snapshots.map((snap, i) => (
+        <div key={snap.timestamp} className="flex items-center justify-between p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700">
+          <div>
+            <div className="text-sm font-extrabold text-gray-700 dark:text-gray-200">
+              {new Date(snap.timestamp).toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-400 font-bold">
+              {snap.taskCount} tasks
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleRestore(i)}
+              variant="ghost"
+              size="sm"
+              className="text-xs font-bold text-primary hover:bg-primary/10 rounded-lg"
+            >
+              {t('settings.restoreSnapshot')}
+            </Button>
+            <Button
+              onClick={() => handleDelete(i)}
+              variant="ghost"
+              size="sm"
+              className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+            >
+              {t('settings.deleteSnapshot')}
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
