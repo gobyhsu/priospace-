@@ -3,6 +3,20 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   Calendar,
   Check,
   Clock,
@@ -10,9 +24,39 @@ import {
   ChevronDown,
   ChevronRight,
   Plus,
+  GripVertical,
 } from "lucide-react";
 import { formatFocusTime } from "@/utils/time";
 import { useTranslation } from "react-i18next";
+
+function SortableTaskItem({ task, isDragging, ...props }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.25 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/drag">
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover/drag:opacity-40 hover:!opacity-80 transition-opacity z-20"
+      >
+        <GripVertical className="h-4 w-4 text-gray-400" />
+      </div>
+      <TaskItem task={task} {...props} />
+    </div>
+  );
+}
 
 export function TaskList({
   tasks,
@@ -21,13 +65,15 @@ export function TaskList({
   onDeleteTask,
   onTaskClick,
   onAddSubtask,
+  onReorderTasks,
 }) {
-  // Use simple object instead of Set for better state management
   const [expandedTasks, setExpandedTasks] = useState({});
   const [collapsedSections, setCollapsedSections] = useState({
     habits: false,
     tasks: false,
   });
+  const [activeDragId, setActiveDragId] = useState(null);
+  const [showDragGuide, setShowDragGuide] = useState(false);
   const { t } = useTranslation();
 
   // Audio refs for sound effects
@@ -132,23 +178,51 @@ export function TaskList({
   const regularTasks = mainTasks.filter((task) => !task.isHabit);
   const habitTasks = mainTasks.filter((task) => task.isHabit);
 
-  // Sort tasks: incomplete first, then by priority, then by dueTime
+  // Sort tasks: incomplete first, then by order
   const sortTasks = (taskList) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
     return [...taskList].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
-      const pa = priorityOrder[a.priority] ?? 1;
-      const pb = priorityOrder[b.priority] ?? 1;
-      if (pa !== pb) return pa - pb;
-      if (a.dueTime && b.dueTime) return a.dueTime.localeCompare(b.dueTime);
-      if (a.dueTime) return -1;
-      if (b.dueTime) return 1;
       return (a.order ?? 0) - (b.order ?? 0);
     });
   };
 
   const sortedRegularTasks = sortTasks(regularTasks);
   const sortedHabitTasks = sortTasks(habitTasks);
+
+  // Drag sensors — require 8px movement to start drag (prevents accidental drags on click)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
+
+  const handleDragStart = (event) => {
+    // First-use: show drag guide instead
+    if (!localStorage.getItem("guideDragReorderSeen")) {
+      localStorage.setItem("guideDragReorderSeen", "true");
+      setShowDragGuide(true);
+      return;
+    }
+    setActiveDragId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    setActiveDragId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sortedRegularTasks.findIndex((t) => t.id === active.id);
+    const newIndex = sortedRegularTasks.findIndex((t) => t.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    if (onReorderTasks) {
+      // Reorder: move task from oldIndex to newIndex and re-assign order values
+      const reordered = arrayMove(sortedRegularTasks, oldIndex, newIndex);
+      const orderUpdates = reordered.map((task, i) => ({
+        id: task.id,
+        order: i,
+      }));
+      onReorderTasks(orderUpdates);
+    }
+  };
 
   // Animation variants
   const containerVariants = {
@@ -332,39 +406,90 @@ export function TaskList({
                   exit="exit"
                   className="overflow-hidden"
                 >
-                  <motion.div
-                    className=""
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                   >
-                    {sortedRegularTasks.map((task, index) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        onTaskClick={handleTaskClick}
-                        onToggleTask={handleToggleTask}
-                        onToggleExpanded={toggleExpanded}
-                        onAddSubtask={handleAddSubtask}
-                        formatTime={formatTime}
-                        getTagInfo={getTagInfo}
-                        getTotalTime={getTotalTime}
-                        getTotalFocusTime={getTotalFocusTime}
-                        isHabit={false}
-                        variants={taskVariants}
-                        isLastTask={index === sortedRegularTasks.length - 1}
-                        isExpanded={expandedTasks[task.id] || false}
-                        expandedTasks={expandedTasks}
-                        level={0}
-                      />
-                    ))}
-                  </motion.div>
+                    <SortableContext
+                      items={sortedRegularTasks.map((t) => t.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {sortedRegularTasks.map((task, index) => (
+                        <SortableTaskItem
+                          key={task.id}
+                          task={task}
+                          isDragging={activeDragId === task.id}
+                          onTaskClick={handleTaskClick}
+                          onToggleTask={handleToggleTask}
+                          onToggleExpanded={toggleExpanded}
+                          onAddSubtask={handleAddSubtask}
+                          formatTime={formatTime}
+                          getTagInfo={getTagInfo}
+                          getTotalTime={getTotalTime}
+                          getTotalFocusTime={getTotalFocusTime}
+                          isHabit={false}
+                          variants={taskVariants}
+                          isLastTask={index === sortedRegularTasks.length - 1}
+                          isExpanded={expandedTasks[task.id] || false}
+                          expandedTasks={expandedTasks}
+                          level={0}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
         )}
+
+        {/* Drag Guide Easter Egg */}
+        <AnimatePresence>
+          {showDragGuide && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/45 z-[90] flex items-center justify-center"
+              onClick={() => setShowDragGuide(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="w-[360px] p-8 bg-white dark:bg-gray-900 rounded-3xl flex flex-col items-center shadow-2xl border-2 border-gray-200 dark:border-gray-700"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-2 mb-4 text-3xl">
+                  <span>⬆️</span>
+                  <motion.span
+                    animate={{ y: [-4, 4, -4] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                    className="text-5xl"
+                  >
+                    ☝️
+                  </motion.span>
+                  <span>⬇️</span>
+                </div>
+                <div className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-2">
+                  {t('guide.dragTitle')}
+                </div>
+                <div className="text-base font-semibold text-gray-500 dark:text-gray-400 text-center leading-relaxed mb-6 whitespace-pre-line">
+                  {t('guide.dragDesc')}
+                </div>
+                <button
+                  onClick={() => setShowDragGuide(false)}
+                  className="px-8 py-3 rounded-full bg-primary text-white font-bold"
+                >
+                  {t('guide.dragDismiss')}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {tasks.length === 0 && (
           <motion.div

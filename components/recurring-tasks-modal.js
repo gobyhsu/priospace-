@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GuideTip } from "@/components/guide-tip";
 
 const PRESET_COLORS = [
   "#ef4444", // red
@@ -327,6 +328,10 @@ export function RecurringTasksModal({
               <X className="h-5 w-5" />
             </Button>
           </motion.div>
+
+          <GuideTip storageKey="guideRecurringSeen" icon="💡" title="Recurring tasks">
+            Create templates for tasks that repeat daily, weekly, or monthly. They auto-generate on each date!
+          </GuideTip>
 
           <motion.div
             variants={contentVariants}

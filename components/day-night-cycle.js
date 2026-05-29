@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useSpring } from "framer-motion";
 import { Sun, Moon, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog } from "lucide-react";
-import { getWeatherIconType } from "@/utils/weather";
+import { getWeatherIconType, getWeatherLabel } from "@/utils/weather";
 import { useTranslation } from "react-i18next";
 
 const weekdayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -99,8 +99,9 @@ export function AnimatedNumber({ value, fontSize, textColor }) {
   );
 }
 
-export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
+export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity, wind, weatherCity }) {
   const [isDay, setIsDay] = useState(true);
+  const [showWeatherDetail, setShowWeatherDetail] = useState(false);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -148,8 +149,10 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
     }
   };
 
+  const weatherLabel = weatherCode ? getWeatherLabel(weatherCode) : null;
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 relative">
       <div className="flex items-center gap-3">
         <div className="text-4xl font-extrabold flex items-center">
           <AnimatedWeekday dayIndex={dayIndex} fontSize={32} />
@@ -167,7 +170,8 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
                 stiffness: 300,
                 damping: 20,
               }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center cursor-pointer"
+              onClick={() => setShowWeatherDetail(!showWeatherDetail)}
             >
               {getWeatherIcon()}
               {temperature !== undefined && temperature !== null && (
@@ -179,6 +183,61 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature }) {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Weather Detail Popup */}
+      <AnimatePresence>
+        {showWeatherDetail && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              onClick={() => setShowWeatherDetail(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="absolute left-0 top-full mt-2 z-50 min-w-[200px] p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+            >
+              <div className="space-y-2">
+                {weatherCity && (
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>📍</span>
+                    <span>{weatherCity.name}</span>
+                  </div>
+                )}
+                {temperature != null && (
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>🌡</span>
+                    <span>{Math.round(temperature)}°C</span>
+                  </div>
+                )}
+                {weatherLabel && (
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>🌤</span>
+                    <span>{weatherLabel}</span>
+                  </div>
+                )}
+                {humidity && (
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>💧</span>
+                    <span>{t('weather.humidity', { value: humidity })}</span>
+                  </div>
+                )}
+                {wind && (
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>🌬</span>
+                    <span>{wind}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

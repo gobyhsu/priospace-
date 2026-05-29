@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GuideTip } from "@/components/guide-tip";
 
 const PRESET_COLORS = [
   "#ef4444", // red
@@ -329,6 +330,10 @@ export function AddTaskModal({
               <X className="h-5 w-5" />
             </Button>
           </motion.div>
+
+          <GuideTip storageKey="guideAddTaskSeen" icon="💡" title="Quick tip">
+            Set priority, add tags, and due time to keep your tasks organized. Try the recurring option for daily habits!
+          </GuideTip>
 
           <motion.div
             variants={contentVariants}

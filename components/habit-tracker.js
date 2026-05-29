@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GuideTip } from "@/components/guide-tip";
 
 const PRESET_COLORS = [
   "#ef4444", // red
@@ -379,6 +380,10 @@ export function HabitTracker({
               <X className="h-5 w-5" />
             </Button>
           </motion.div>
+
+          <GuideTip storageKey="guideHabitTrackerSeen" icon="💡" title="Habit tracking">
+            Tap a day on the calendar to check in. Track your streaks and see monthly progress at a glance!
+          </GuideTip>
 
           <motion.div
             variants={contentVariants}

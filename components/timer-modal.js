@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CountdownTimer } from "@/components/countdown-timer";
+import { GuideTip } from "@/components/guide-tip";
 
 export function TimerModal({
   visible = true,
@@ -729,6 +730,12 @@ export function TimerModal({
           )}
 
           {/* Immersive task name — always show when running */}
+          {!isRunning && (
+            <GuideTip storageKey="guideTimerSeen" icon="💡" title="Timer tips">
+              Pick a task to track focus time. Minimize the timer to keep working — it runs in the background!
+            </GuideTip>
+          )}
+
           {isRunning && (
             <div className="text-center mb-3">
               <span className="text-base font-bold text-gray-800 dark:text-gray-200 opacity-85">

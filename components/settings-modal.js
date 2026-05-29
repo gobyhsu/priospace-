@@ -29,6 +29,7 @@ import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { getSnapshots, restoreSnapshot, deleteSnapshot } from "@/lib/backup";
+import { GuideTip } from "@/components/guide-tip";
 
 export function SettingsModal({
   onClose,
@@ -50,6 +51,7 @@ export function SettingsModal({
   onResetApp,
   weatherCity,
   onSetWeatherCity,
+  onOpenHelp,
 }) {
   const { t } = useTranslation();
   const [editingTagId, setEditingTagId] = useState(null);
@@ -62,6 +64,7 @@ export function SettingsModal({
   const [editHabitName, setEditHabitName] = useState("");
   const [newHabitName, setNewHabitName] = useState("");
   const [newHabitTagId, setNewHabitTagId] = useState("");
+  const [showDataMenu, setShowDataMenu] = useState(false);
   const modalRef = useRef(null);
 
   const startEditing = (tag) => {
@@ -365,6 +368,10 @@ export function SettingsModal({
               <X className="h-5 w-5" />
             </Button>
           </motion.div>
+
+          <GuideTip storageKey="guideSettingsSeen" icon="💡" title="Quick overview">
+            Customize your theme, manage tags and habits, set your weather city, and explore data backup options.
+          </GuideTip>
 
           <motion.div
             variants={contentVariants}
@@ -854,72 +861,139 @@ export function SettingsModal({
               </div>
             </motion.div>
 
-            {/* Export Data */}
+            {/* Data Import/Export — expandable */}
             <motion.div variants={itemVariants}>
-              <div className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
-                <div className="flex items-center gap-3">
-                  <Upload className="h-5 w-5 text-primary" />
-                  <div>
-                    <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      {t('settings.exportData')}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      {t('settings.exportDesc')}
+              <div className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 space-y-3">
+                <button
+                  onClick={() => setShowDataMenu(!showDataMenu)}
+                  className="w-full flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">📦</span>
+                    <div className="text-left">
+                      <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                        {t('settings.dataImportExport')}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        {t('settings.dataImportExportDesc')}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    onClick={onExportData}
-                    variant="outline"
-                    size="sm"
-                    className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-12 p-0"
+                  <motion.span
+                    animate={{ rotate: showDataMenu ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-xl text-gray-400"
                   >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </motion.div>
+                    ›
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {showDataMenu && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden space-y-2"
+                    >
+                      <button
+                        onClick={onExportData}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <span>📤</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200">{t('settings.exportData')}</span>
+                      </button>
+                      <button
+                        onClick={onImportData}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <span>📥</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200">{t('settings.importData')}</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
 
-            {/* Import Data */}
-            <motion.div variants={itemVariants}>
-              <div className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
-                <div className="flex items-center gap-3">
-                  <Download className="h-5 w-5 text-primary" />
-                  <div>
-                    <div className="font-extrabold text-gray-900 dark:text-gray-100">
-                      {t('settings.importData')}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      {t('settings.importDesc')}
+            {/* Help Center — standalone */}
+            {onOpenHelp && (
+              <motion.div variants={itemVariants}>
+                <div className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">📖</span>
+                    <div>
+                      <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                        {t('help.title')}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        {t('settings.helpDesc')}
+                      </div>
                     </div>
                   </div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={onOpenHelp}
+                      variant="outline"
+                      size="sm"
+                      className="border-2 border-gray-300 dark:border-gray-600 rounded-xl font-extrabold w-12 h-12 p-0"
+                    >
+                      <span className="text-lg">›</span>
+                    </Button>
+                  </motion.div>
                 </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    onClick={onImportData}
-                    variant="outline"
-                    size="sm"
-                    className="border-2 border-gray-300 dark:border-gray-600 hover:border-primary/70 dark:hover:border-primary/80 rounded-xl font-extrabold w-12 h-12 p-0"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
 
-            {/* Backup Snapshots */}
-            <motion.div variants={itemVariants} className="space-y-3">
-              <label className="text-sm font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                {t('settings.backupSnapshots')}
-              </label>
-              <BackupSnapshots />
+            {/* Backup & Reset */}
+            <motion.div variants={itemVariants}>
+              <div className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">🗄</span>
+                  <div className="font-extrabold text-gray-900 dark:text-gray-100">
+                    {t('settings.backupAndReset')}
+                  </div>
+                </div>
+
+                {/* Snapshots */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('settings.backupSnapshots')}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                      {t('settings.maxSnapshots')}
+                    </span>
+                  </div>
+                  <BackupSnapshots />
+                </div>
+
+                {/* Reset */}
+                <div className="pt-3 border-t-2 border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="h-5 w-5 text-red-500" />
+                      <div>
+                        <div className="font-extrabold text-red-600 dark:text-red-400">
+                          {t('settings.resetApp')}
+                        </div>
+                        <div className="text-sm text-red-500/70 dark:text-red-400/60 font-medium">
+                          {t('settings.resetDesc')}
+                        </div>
+                      </div>
+                    </div>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        onClick={onResetApp}
+                        variant="destructive"
+                        size="sm"
+                        className="rounded-xl font-extrabold px-4"
+                      >
+                        {t('common.reset')}
+                      </Button>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
 
             {/* App Info */}
@@ -935,7 +1009,6 @@ export function SettingsModal({
                   {t('settings.tagline')}
                 </div>
 
-                {/* vibecoded section */}
                 <div className="pt-3">
                   <div className="text-sm text-gray-600 dark:text-gray-300 font-medium -mt-1">
                     <span className="text-lg font-extrabold text-primary">
@@ -970,35 +1043,6 @@ export function SettingsModal({
                 </div>
               </div>
             </motion.div>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center justify-between p-4 mt-7 rounded-xl border-2 border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <div>
-                  <div className="font-extrabold text-red-600 dark:text-red-400">
-                    {t('settings.resetApp')}
-                  </div>
-                  <div className="text-sm text-red-500/70 dark:text-red-400/60 font-medium">
-                    {t('settings.resetDesc')}
-                  </div>
-                </div>
-              </div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={onResetApp}
-                  variant="destructive"
-                  size="sm"
-                  className="rounded-xl font-extrabold px-4"
-                >
-                  {t('common.reset')}
-                </Button>
-              </motion.div>
-            </div>
           </motion.div>
         </div>
       </motion.div>

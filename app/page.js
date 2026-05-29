@@ -32,6 +32,8 @@ import {
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { saveSnapshot } from "@/lib/backup";
+import { GuideOverlay, isGuideCompleted } from "@/components/guide-overlay";
+import { HelpModal } from "@/components/help-modal";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -56,11 +58,15 @@ export default function Home() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showIntroScreen, setShowIntroScreen] = useState(true);
+  const [showGuide, setShowGuide] = useState(false);
   const [parentTaskForSubtask, setParentTaskForSubtask] = useState(null);
   const [showWebRTCShare, setShowWebRTCShare] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [weatherCity, setWeatherCity] = useState(null);
   const [weatherCode, setWeatherCode] = useState(null);
   const [weatherTemp, setWeatherTemp] = useState(null);
+  const [weatherHumidity, setWeatherHumidity] = useState(null);
+  const [weatherWind, setWeatherWind] = useState(null);
 
   // Fetch weather data
   const refreshWeather = async (city) => {
@@ -69,9 +75,13 @@ export default function Home() {
       const weather = await fetchWeather(city.adcode);
       setWeatherCode(weather.weather);
       setWeatherTemp(weather.temperature);
+      setWeatherHumidity(weather.humidity);
+      setWeatherWind(`${weather.winddirection}风 ${weather.windpower}级`);
       setCachedWeather({
         weather: weather.weather,
         temperature: weather.temperature,
+        humidity: weather.humidity,
+        wind: `${weather.winddirection}风 ${weather.windpower}级`,
       });
     } catch (e) {
       console.log("Weather fetch failed:", e);
@@ -181,10 +191,20 @@ export default function Home() {
       if (cached) {
         setWeatherCode(cached.weather);
         setWeatherTemp(cached.temperature);
+        setWeatherHumidity(cached.humidity || null);
+        setWeatherWind(cached.wind || null);
       }
       refreshWeather(savedCity);
     } else {
       autoDetectWeather();
+    }
+
+    // Show guide for first-time users with no data
+    if (!isGuideCompleted()) {
+      const hasData = savedDailyTasks || savedCustomTags || savedHabits || savedRecurringTasks;
+      if (!hasData) {
+        setShowGuide(true);
+      }
     }
   }, []);
 
@@ -1279,11 +1299,11 @@ export default function Home() {
     setRecurringTasks((prev) => prev.filter((rt) => rt.id !== id));
   };
 
-  const reorderTasks = (newOrder) => {
+  const reorderTasks = (orderUpdates) => {
     const dateString = getDateString(selectedDate);
     const orderMap = {};
-    newOrder.forEach((task, index) => {
-      orderMap[task.id] = index;
+    orderUpdates.forEach(({ id, order }) => {
+      orderMap[id] = order;
     });
     const currentTasks = getCurrentDayTasks();
     const updatedTasks = currentTasks.map((task) => ({
@@ -1294,6 +1314,7 @@ export default function Home() {
   };
 
   const resetApp = () => {
+    if (!window.confirm(t('settings.resetConfirm'))) return;
     localStorage.clear();
     setDailyTasks({});
     setCustomTags([]);
@@ -1342,6 +1363,13 @@ export default function Home() {
 
       {!showIntroScreen && (
         <div className="min-h-screen transition-colors duration-300 bg-background">
+          {/* Guide Overlay */}
+          <AnimatePresence>
+            {showGuide && (
+              <GuideOverlay onComplete={() => setShowGuide(false)} />
+            )}
+          </AnimatePresence>
+
           {/* Mobile/Tablet Layout (up to lg) */}
           <div className="lg:hidden max-w-lg mx-auto min-h-screen px-4 relative overflow-hidden">
             <motion.div
@@ -1352,7 +1380,8 @@ export default function Home() {
             >
               <button
                 onClick={() => setShowSettings(true)}
-                className="absolute left-1/2 -translate-x-1/2 z-10 bg-primary text-background rounded-b-lg py-2 px-2 pt-1"
+                data-guide="settings"
+                className="settings-btn absolute left-1/2 -translate-x-1/2 z-10 bg-primary text-background rounded-b-lg py-2 px-2 pt-1"
               >
                 <Settings className="h-3 w-3" />
               </button>
@@ -1364,7 +1393,7 @@ export default function Home() {
                 className="p-4 px-0 border-b border-dashed"
               >
                 <div className="flex items-center justify-between">
-                  <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} />
+                  <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} wind={weatherWind} weatherCity={weatherCity} />
                   <div className="flex items-center gap-2">
                     <div className="text-right flex flex-col">
                       <div className="text-xl font-extrabold flex items-center gap-2">
@@ -1389,6 +1418,7 @@ export default function Home() {
 
               <div className="py-3 border-b border-dashed">
                 <WeeklyCalendar
+                  data-guide="calendar"
                   selectedDate={selectedDate}
                   onDateSelect={setSelectedDate}
                   dailyTasks={dailyTasks}
@@ -1510,6 +1540,7 @@ export default function Home() {
                   onDeleteTask={deleteTask}
                   onTaskClick={handleTaskClick}
                   onAddSubtask={handleAddSubtask}
+                  onReorderTasks={reorderTasks}
                 />
               </div>
 
@@ -1517,6 +1548,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <Button
                     onClick={() => setShowSearch(true)}
+                    data-guide="search"
                     variant="ghost"
                     size="sm"
                     className="flex items-center justify-center gap-1 font-extrabold hover:bg-accent/50 group dark:text-white px-2"
@@ -1526,6 +1558,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowTimer(true)}
+                    data-guide="timer"
                     variant="ghost"
                     size="lg"
                     className="flex-1 flex items-center justify-center px-4 sm:px-8 gap-2 font-extrabold hover:bg-accent/50 group dark:text-white"
@@ -1538,6 +1571,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowAddTask(true)}
+                    data-guide="add-task"
                     size="lg"
                     className="mx-2 rounded-full w-12 h-12 px-4 sm:px-8 bg-primary hover:bg-primary/90 group hover:scale-110 transition-transform [&_svg]:size-5"
                   >
@@ -1546,6 +1580,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowHabits(true)}
+                    data-guide="habits"
                     variant="ghost"
                     size="lg"
                     className="flex-1 flex items-center justify-center px-4 sm:px-8 gap-2 font-extrabold group hover:bg-accent/50 dark:text-white"
@@ -1558,6 +1593,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowStatistics(true)}
+                    data-guide="statistics"
                     variant="ghost"
                     size="sm"
                     className="flex items-center justify-center gap-1 font-extrabold hover:bg-accent/50 group dark:text-white px-2"
@@ -1589,7 +1625,8 @@ export default function Home() {
                   </div>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="bg-primary text-background rounded-lg py-3 px-4 hover:bg-primary/90 transition-colors"
+                    data-guide="settings"
+                    className="settings-btn bg-primary text-background rounded-lg py-3 px-4 hover:bg-primary/90 transition-colors"
                   >
                     <Settings className="h-4 w-4" />
                   </button>
@@ -1602,7 +1639,7 @@ export default function Home() {
                   className="p-4 border-b border-dashed px-6"
                 >
                   <div className="flex items-center justify-between">
-                    <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} />
+                    <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} wind={weatherWind} weatherCity={weatherCity} />
                     <div className="flex items-center gap-2">
                       <div className="text-right flex flex-col">
                         <div className="text-xl font-extrabold flex items-center gap-2">
@@ -1628,6 +1665,7 @@ export default function Home() {
                 {/* Calendar */}
                 <div className="p-6 border-b border-dashed">
                   <WeeklyCalendar
+                    data-guide="calendar"
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
                     dailyTasks={dailyTasks}
@@ -1735,6 +1773,7 @@ export default function Home() {
                 <div className="p-6 space-y-4 flex-1">
                   <Button
                     onClick={() => setShowAddTask(true)}
+                    data-guide="add-task"
                     size="lg"
                     className="w-full h-12 bg-primary hover:bg-primary/90 group hover:scale-[1.02] transition-all duration-200 [&_svg]:size-5 rounded-2xl"
                   >
@@ -1744,6 +1783,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowSearch(true)}
+                    data-guide="search"
                     variant="outline"
                     size="lg"
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
@@ -1754,6 +1794,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowTimer(true)}
+                    data-guide="timer"
                     variant="outline"
                     size="lg"
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
@@ -1764,6 +1805,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowHabits(true)}
+                    data-guide="habits"
                     variant="outline"
                     size="lg"
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
@@ -1784,6 +1826,7 @@ export default function Home() {
 
                   <Button
                     onClick={() => setShowStatistics(true)}
+                    data-guide="statistics"
                     variant="outline"
                     size="lg"
                     className="w-full h-12 font-bold hover:bg-accent/50 group hover:scale-[1.02] transition-all duration-200 rounded-2xl"
@@ -1822,6 +1865,7 @@ export default function Home() {
                       onDeleteTask={deleteTask}
                       onTaskClick={handleTaskClick}
                       onAddSubtask={handleAddSubtask}
+                      onReorderTasks={reorderTasks}
                     />
                   </div>
                 </div>
@@ -1852,7 +1896,12 @@ export default function Home() {
                 onResetApp={resetApp}
                 weatherCity={weatherCity}
                 onSetWeatherCity={handleSetWeatherCity}
+                onOpenHelp={() => setShowHelp(true)}
               />
+            )}
+
+            {showHelp && (
+              <HelpModal onClose={() => setShowHelp(false)} />
             )}
 
             {showWebRTCShare && (
