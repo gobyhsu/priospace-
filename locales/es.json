@@ -45,7 +45,7 @@
     "exportDesc": "Respaldar tareas y hábitos",
     "importData": "Importar datos",
     "importDesc": "Restaurar desde archivo de respaldo",
-    "resetApp": "Reiniciar PrioSpace",
+    "resetApp": "Reiniciar Priospace Plus",
     "resetDesc": "Eliminar permanentemente todos los datos",
     "resetConfirm": "Esto eliminará todas las tareas, hábitos, etiquetas, tareas recurrentes e instantáneas de respaldo. No se puede deshacer. ¿Estás seguro?",
     "dataImportExport": "Importar/Exportar datos",
@@ -53,16 +53,22 @@
     "backupAndReset": "Respaldo y reinicio",
     "maxSnapshots": "Máximo 5 instantáneas",
     "helpDesc": "Ver guía de uso y descripciones de funciones",
-    "version": "PrioSpace V1.5.1",
+    "version": "Priospace Plus V1.5.2",
     "tagline": "Enfócate · Rastrea · Logra",
-    "localizedBy": "Traducido por 迷汁逃桃",
+    "localizedBy": "Fork y mejoras por gobyhsu",
+    "checkUpdates": "Buscar actualizaciones",
+    "updateAvailable": "Nueva versión {{version}} — clic para descargar",
+    "upToDate": "Actualizado",
+    "checking": "Verificando…",
+    "githubRepo": "https://github.com/gobyhsu/priospace-",
     "language": "Idioma",
     "languageDesc": "Cambiar idioma de la interfaz",
     "backupSnapshots": "Instantáneas de respaldo",
     "restoreSnapshot": "Restaurar",
     "deleteSnapshot": "Eliminar",
     "noSnapshots": "Sin instantáneas",
-    "restoreConfirm": "¿Restaurar esta instantánea? Los datos actuales serán reemplazados."
+    "restoreConfirm": "¿Restaurar esta instantánea? Los datos actuales serán reemplazados.",
+    "snapshotTasks": "{{count}} tareas"
   },
   "theme": {
     "default": { "name": "Predeterminado", "desc": "Ambiente verde fresco" },
@@ -205,7 +211,7 @@
     "quickPresets": "Presets rápidos"
   },
   "intro": {
-    "brandName": "PrioSpace",
+    "brandName": "Priospace Plus",
     "tagline": "Enfócate · Rastrea · Logra",
     "quotes": [
       "Concéntrate en lo que importa.",
@@ -231,7 +237,7 @@
     "hero": "Una aplicación de productividad moderna y elegante con potente gestión de tareas, temporizador Pomodoro, rastreo de hábitos y colaboración.",
     "web": "Web",
     "openSource": "Código abierto y gratuito",
-    "openSourceDesc": "PrioSpace es completamente de código abierto. Dale una estrella al repo, contribuye con código, o haz un fork para crear tu propia versión.",
+    "openSourceDesc": "Priospace Plus es completamente de código abierto. Dale una estrella al repo, contribuye con código, o haz un fork para crear tu propia versión.",
     "starGitHub": "Estrella en GitHub",
     "buyMeCoffee": "Invítame un café"
   },
@@ -316,12 +322,33 @@
     "es": "Español"
   },
   "weather": {
-    "humidity": "Humedad {{value}}%"
+    "humidity": "Humedad {{value}}%",
+    "clear": "Despejado",
+    "fewClouds": "Poco nublado",
+    "cloudy": "Nublado",
+    "overcast": "Cubierto",
+    "rain": "Lluvia",
+    "showers": "Chubascos",
+    "drizzle": "Llovizna",
+    "snow": "Nieve",
+    "snowShowers": "Nevadas",
+    "fog": "Niebla",
+    "thunderstorm": "Tormenta",
+    "dust": "Polvo",
+    "windN": "N",
+    "windNE": "NE",
+    "windE": "E",
+    "windSE": "SE",
+    "windS": "S",
+    "windSW": "SO",
+    "windW": "O",
+    "windNW": "NO",
+    "windFormat": "{{direction}} viento {{level}}"
   },
   "guide": {
-    "welcome": "Bienvenido a PrioSpace",
+    "welcome": "Bienvenido a Priospace Plus",
     "welcomeDesc": "Exploremos rápidamente las funciones",
-    "welcomeTitle": "PrioSpace",
+    "welcomeTitle": "Priospace Plus",
     "welcomeSubtitle": "Gestión de tareas simple y eficiente",
     "welcomeTagline": "Ayudándote a enfocarte en lo que realmente importa",
     "welcomeStart": "Vamos a explorar",
@@ -355,7 +382,7 @@
   },
   "help": {
     "title": "Centro de ayuda",
-    "welcome": "Bienvenido a PrioSpace",
+    "welcome": "Bienvenido a Priospace Plus",
     "welcomeDesc": "Tu herramienta personal de productividad",
     "tasks": "Gestión de tareas",
     "tasksDesc": "Establece prioridad, etiquetas y hora límite al crear tareas. Mantén presionado para arrastrar y reordenar.",
@@ -373,5 +400,14 @@
     "settingsDesc": "Cambia temas y modo oscuro, gestiona etiquetas, hábitos, ciudad del clima y más.",
     "data": "Seguridad de datos",
     "dataDesc": "Todos los datos almacenados localmente con copias de seguridad automáticas. Importación y exportación soportadas."
+  },
+  "activityLog": {
+    "title": "Registro de actividad",
+    "totalCompleted": "{{count}} completadas",
+    "last7Days": "7 días",
+    "last30Days": "30 días",
+    "allTime": "Todo",
+    "allTags": "Todas las etiquetas",
+    "empty": "Sin tareas completadas en este período"
   }
 }

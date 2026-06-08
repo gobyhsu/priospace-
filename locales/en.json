@@ -45,7 +45,7 @@
     "exportDesc": "Backup tasks and habits",
     "importData": "Import Data",
     "importDesc": "Restore from backup file",
-    "resetApp": "Reset PrioSpace",
+    "resetApp": "Reset Priospace Plus",
     "resetDesc": "Permanently delete all data",
     "resetConfirm": "This will clear all tasks, habits, tags, recurring tasks, and backup snapshots. This cannot be undone. Are you sure?",
     "dataImportExport": "Data Import/Export",
@@ -53,16 +53,22 @@
     "backupAndReset": "Backup & Reset",
     "maxSnapshots": "Up to 5 snapshots",
     "helpDesc": "View usage guide and feature descriptions",
-    "version": "PrioSpace V1.5.1",
+    "version": "Priospace Plus V1.5.2",
     "tagline": "Focus · Track · Achieve",
-    "localizedBy": "Localized by 迷汁逃桃",
+    "localizedBy": "Forked & enhanced by gobyhsu",
+    "checkUpdates": "Check for Updates",
+    "updateAvailable": "New version {{version}} available — click to download",
+    "upToDate": "Up to date",
+    "checking": "Checking…",
+    "githubRepo": "https://github.com/gobyhsu/priospace-",
     "language": "Language",
     "languageDesc": "Change interface language",
     "backupSnapshots": "Backup Snapshots",
     "restoreSnapshot": "Restore",
     "deleteSnapshot": "Delete",
     "noSnapshots": "No snapshots",
-    "restoreConfirm": "Restore this snapshot? Current data will be replaced."
+    "restoreConfirm": "Restore this snapshot? Current data will be replaced.",
+    "snapshotTasks": "{{count}} tasks"
   },
   "theme": {
     "default": { "name": "Default", "desc": "Fresh green vibe" },
@@ -205,7 +211,7 @@
     "quickPresets": "Quick Presets"
   },
   "intro": {
-    "brandName": "PrioSpace",
+    "brandName": "Priospace Plus",
     "tagline": "Focus · Track · Achieve",
     "quotes": [
       "Focus on what matters.",
@@ -231,7 +237,7 @@
     "hero": "A beautifully crafted, modern productivity app with powerful task management, Pomodoro timer, habit tracking, and task collaboration.",
     "web": "Web",
     "openSource": "Open Source & Free",
-    "openSourceDesc": "PrioSpace is fully open source. Star the repo, contribute code, or fork it to build your own version.",
+    "openSourceDesc": "Priospace Plus is fully open source. Star the repo, contribute code, or fork it to build your own version.",
     "starGitHub": "Star on GitHub",
     "buyMeCoffee": "Buy Me a Coffee"
   },
@@ -316,12 +322,33 @@
     "es": "Español"
   },
   "weather": {
-    "humidity": "Humidity {{value}}%"
+    "humidity": "Humidity {{value}}%",
+    "clear": "Clear",
+    "fewClouds": "Few clouds",
+    "cloudy": "Cloudy",
+    "overcast": "Overcast",
+    "rain": "Rain",
+    "showers": "Showers",
+    "drizzle": "Drizzle",
+    "snow": "Snow",
+    "snowShowers": "Snow showers",
+    "fog": "Fog",
+    "thunderstorm": "Thunderstorm",
+    "dust": "Dust",
+    "windN": "N",
+    "windNE": "NE",
+    "windE": "E",
+    "windSE": "SE",
+    "windS": "S",
+    "windSW": "SW",
+    "windW": "W",
+    "windNW": "NW",
+    "windFormat": "{{direction}} wind {{level}}"
   },
   "guide": {
-    "welcome": "Welcome to PrioSpace",
+    "welcome": "Welcome to Priospace Plus",
     "welcomeDesc": "Let's quickly explore the features",
-    "welcomeTitle": "PrioSpace",
+    "welcomeTitle": "Priospace Plus",
     "welcomeSubtitle": "Simple & efficient task management",
     "welcomeTagline": "Helping you focus on what truly matters",
     "welcomeStart": "Let's Explore",
@@ -355,7 +382,7 @@
   },
   "help": {
     "title": "Help Center",
-    "welcome": "Welcome to PrioSpace",
+    "welcome": "Welcome to Priospace Plus",
     "welcomeDesc": "Your personal productivity tool",
     "tasks": "Task Management",
     "tasksDesc": "Set priority, tags, and due time when creating tasks. Long press to drag and reorder.",
@@ -373,5 +400,14 @@
     "settingsDesc": "Switch themes and dark mode, manage tags, habits, weather city, and more.",
     "data": "Data Safety",
     "dataDesc": "All data stored locally with auto-backup snapshots. Import and export supported."
+  },
+  "activityLog": {
+    "title": "Activity Log",
+    "totalCompleted": "{{count}} completed",
+    "last7Days": "7 days",
+    "last30Days": "30 days",
+    "allTime": "All",
+    "allTags": "All tags",
+    "empty": "No completed tasks in this period"
   }
 }

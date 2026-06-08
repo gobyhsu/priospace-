@@ -53,16 +53,22 @@
     "backupAndReset": "备份与重置",
     "maxSnapshots": "最多保留 5 份",
     "helpDesc": "查看使用指南和功能说明",
-    "version": "优事空间 PrioSpace V1.5.1",
+    "version": "优事空间 Priospace Plus V1.5.2",
     "tagline": "专注 · 追踪 · 成就",
-    "localizedBy": "汉化 by 迷汁逃桃",
+    "localizedBy": "二次开发 & 增强 by 迷汁逃桃",
+    "checkUpdates": "检查更新",
+    "updateAvailable": "发现新版本 {{version}}，点击下载",
+    "upToDate": "已是最新版本",
+    "checking": "正在检查…",
+    "githubRepo": "https://github.com/gobyhsu/priospace-",
     "language": "语言",
     "languageDesc": "更改界面语言",
     "backupSnapshots": "备份快照",
     "restoreSnapshot": "恢复",
     "deleteSnapshot": "删除",
     "noSnapshots": "暂无快照",
-    "restoreConfirm": "确认恢复此快照？当前数据将被替换。"
+    "restoreConfirm": "确认恢复此快照？当前数据将被替换。",
+    "snapshotTasks": "{{count}} 个任务"
   },
   "theme": {
     "default": { "name": "默认", "desc": "清新绿色氛围" },
@@ -205,7 +211,7 @@
     "quickPresets": "快速预设"
   },
   "intro": {
-    "brandName": "优事空间 PrioSpace",
+    "brandName": "优事空间\nPriospace Plus",
     "tagline": "专注 · 追踪 · 成就",
     "quotes": [
       "专注于重要的事。",
@@ -231,7 +237,7 @@
     "hero": "一款精美、现代的生产力应用，集成了强大的任务管理、番茄计时器、习惯追踪和任务协作功能。",
     "web": "网页",
     "openSource": "开源且免费",
-    "openSourceDesc": "优事空间 PrioSpace 是完全开源的。给仓库加星标、为项目贡献代码，或者 fork 它来定制你自己的版本。",
+    "openSourceDesc": "优事空间 Priospace Plus 是完全开源的。给仓库加星标、为项目贡献代码，或者 fork 它来定制你自己的版本。",
     "starGitHub": "在 GitHub 上星标",
     "buyMeCoffee": "请我喝咖啡"
   },
@@ -316,7 +322,28 @@
     "days": "天"
   },
   "weather": {
-    "humidity": "湿度 {{value}}%"
+    "humidity": "湿度 {{value}}%",
+    "clear": "晴",
+    "fewClouds": "少云",
+    "cloudy": "多云",
+    "overcast": "阴",
+    "rain": "雨",
+    "showers": "阵雨",
+    "drizzle": "毛毛雨",
+    "snow": "雪",
+    "snowShowers": "阵雪",
+    "fog": "雾",
+    "thunderstorm": "雷",
+    "dust": "浮尘",
+    "windN": "北",
+    "windNE": "东北",
+    "windE": "东",
+    "windSE": "东南",
+    "windS": "南",
+    "windSW": "西南",
+    "windW": "西",
+    "windNW": "西北",
+    "windFormat": "{{direction}}风 {{level}}级"
   },
   "guide": {
     "welcome": "欢迎来到优事空间",
@@ -373,5 +400,14 @@
     "settingsDesc": "切换主题风格和深色模式、管理分类标签和习惯、设置天气城市。",
     "data": "数据安全",
     "dataDesc": "所有数据存储在本地，自动备份快照，支持导入导出。"
+  },
+  "activityLog": {
+    "title": "活动日志",
+    "totalCompleted": "共完成 {{count}} 项",
+    "last7Days": "7天",
+    "last30Days": "30天",
+    "allTime": "全部",
+    "allTags": "全部分类",
+    "empty": "此时间段暂无已完成任务"
   }
 }

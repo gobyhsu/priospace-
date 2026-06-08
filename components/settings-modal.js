@@ -65,6 +65,8 @@ export function SettingsModal({
   const [newHabitName, setNewHabitName] = useState("");
   const [newHabitTagId, setNewHabitTagId] = useState("");
   const [showDataMenu, setShowDataMenu] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
   const modalRef = useRef(null);
 
   const startEditing = (tag) => {
@@ -236,6 +238,26 @@ export function SettingsModal({
 
   const handleTwitterClick = () => {
     window.open("https://x.com/Anoyroyc", "_blank");
+  };
+
+  const handleCheckUpdates = async () => {
+    setCheckingUpdate(true);
+    setUpdateStatus(null);
+    try {
+      const res = await fetch("https://api.github.com/repos/gobyhsu/priospace-/releases/latest");
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      const latest = data.tag_name?.replace(/^v/, "");
+      const current = "1.5.1";
+      if (latest && latest !== current) {
+        setUpdateStatus(t("settings.updateAvailable", { version: data.tag_name }));
+      } else {
+        setUpdateStatus(t("settings.upToDate"));
+      }
+    } catch {
+      setUpdateStatus(t("settings.upToDate"));
+    }
+    setCheckingUpdate(false);
   };
 
   const handleWebRTCShare = () => {
@@ -1009,6 +1031,20 @@ export function SettingsModal({
                   {t('settings.tagline')}
                 </div>
 
+                {/* Check for Updates */}
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCheckUpdates}
+                    disabled={checkingUpdate}
+                    className="rounded-xl text-xs font-bold gap-1.5"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${checkingUpdate ? 'animate-spin' : ''}`} />
+                    {updateStatus || t('settings.checkUpdates')}
+                  </Button>
+                </div>
+
                 <div className="pt-3">
                   <div className="text-sm text-gray-600 dark:text-gray-300 font-medium -mt-1">
                     <span className="text-lg font-extrabold text-primary">
@@ -1037,9 +1073,15 @@ export function SettingsModal({
                       Anoy Roy Chowdhury
                     </motion.button>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 font-medium pt-2">
+                  <motion.a
+                    href={t('settings.githubRepo')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block text-sm text-gray-500 dark:text-gray-400 font-medium pt-2 hover:text-primary transition-colors cursor-pointer"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     {t('settings.localizedBy')}
-                  </div>
+                  </motion.a>
                 </div>
               </div>
             </motion.div>
@@ -1091,10 +1133,10 @@ function BackupSnapshots() {
         <div key={snap.timestamp} className="flex items-center justify-between p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700">
           <div>
             <div className="text-sm font-extrabold text-gray-700 dark:text-gray-200">
-              {new Date(snap.timestamp).toLocaleString()}
+              {new Date(snap.timestamp).toLocaleString(i18n.language === "zh-TW" ? "zh-TW" : i18n.language)}
             </div>
             <div className="text-xs text-gray-400 font-bold">
-              {snap.taskCount} tasks
+              {t('settings.snapshotTasks', { count: snap.taskCount })}
             </div>
           </div>
           <div className="flex gap-2">

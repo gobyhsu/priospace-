@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { X, BarChart3, Clock, Flame, Camera } from "lucide-react";
+import { X, BarChart3, Clock, Flame, Camera, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   BarChart,
@@ -27,12 +27,14 @@ import {
   formatMinutes,
 } from "@/lib/statistics";
 import html2canvas from "html2canvas";
+import { ActivityLog } from "@/components/activity-log";
 
 const CHART_COLORS = ["#22c55e", "#3b82f6", "#f97316", "#ef4444", "#8b5cf6"];
 
 export function StatisticsModal({ dailyTasks, customTags, habits, onClose }) {
   const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState(30);
+  const [mode, setMode] = useState("charts"); // "charts" | "log"
   const contentRef = useRef(null);
   const modalRef = useRef(null);
 
@@ -225,6 +227,38 @@ export function StatisticsModal({ dailyTasks, customTags, habits, onClose }) {
             </Button>
           </motion.div>
 
+          {/* Mode Tabs */}
+          <motion.div
+            variants={itemVariants}
+            className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-4"
+          >
+            <button
+              onClick={() => setMode("charts")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${
+                mode === "charts"
+                  ? "bg-white dark:bg-gray-700 text-primary shadow-sm"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              {t("statistics.title")}
+            </button>
+            <button
+              onClick={() => setMode("log")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${
+                mode === "log"
+                  ? "bg-white dark:bg-gray-700 text-primary shadow-sm"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              <List className="h-4 w-4" />
+              {t("activityLog.title")}
+            </button>
+          </motion.div>
+
+          {mode === "log" ? (
+            <ActivityLog dailyTasks={dailyTasks} customTags={customTags} embedded />
+          ) : (
           <motion.div
             variants={contentVariants}
             initial="hidden"
@@ -544,6 +578,7 @@ export function StatisticsModal({ dailyTasks, customTags, habits, onClose }) {
               </motion.div>
             </motion.div>
           </motion.div>
+          )}
         </div>
       </motion.div>
     </motion.div>

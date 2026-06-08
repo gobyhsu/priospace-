@@ -104,7 +104,7 @@ export function GuideOverlay({ onComplete }) {
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="text-center px-8 max-w-sm"
           >
-            <img src="/logo.png" alt="PrioSpace" className="w-24 h-24 rounded-2xl mx-auto mb-4" />
+            <img src="/logo.png" alt="Priospace Plus" className="w-24 h-24 rounded-2xl mx-auto mb-4" />
             <h2 className="text-3xl font-black text-white mb-2 tracking-wide">
               {t('guide.welcomeTitle')}
             </h2>

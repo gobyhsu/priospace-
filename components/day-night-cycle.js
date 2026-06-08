@@ -119,7 +119,37 @@ export function AnimatedNumber({ value, fontSize, textColor }) {
   );
 }
 
-export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity, wind, weatherCity }) {
+// Chinese weather label → i18n key
+const WEATHER_KEY_MAP = {
+  "晴": "weather.clear",
+  "少云": "weather.fewClouds",
+  "多云": "weather.cloudy",
+  "阴": "weather.overcast",
+  "雨": "weather.rain",
+  "阵雨": "weather.showers",
+  "毛毛雨": "weather.drizzle",
+  "雪": "weather.snow",
+  "阵雪": "weather.snowShowers",
+  "雾": "weather.fog",
+  "雷": "weather.thunderstorm",
+  "浮尘": "weather.dust",
+  "扬沙": "weather.dust",
+  "沙尘": "weather.dust",
+};
+
+const WIND_DIR_KEY_MAP = {
+  "北": "weather.windN",
+  "东北": "weather.windNE",
+  "东": "weather.windE",
+  "东南": "weather.windSE",
+  "南": "weather.windS",
+  "西南": "weather.windSW",
+  "西": "weather.windW",
+  "西北": "weather.windNW",
+};
+
+export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity, windDir, windPower, weatherCity }) {
+  const { t } = useTranslation();
   const [isDay, setIsDay] = useState(true);
   const [showWeatherDetail, setShowWeatherDetail] = useState(false);
 
@@ -241,7 +271,7 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity
               {weatherLabel && (
                 <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
                   <span>🌤</span>
-                  <span>{weatherLabel}</span>
+                  <span>{t(WEATHER_KEY_MAP[weatherLabel] || 'weather.cloudy')}</span>
                 </div>
               )}
               {humidity != null && (
@@ -250,10 +280,10 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity
                   <span>{t('weather.humidity', { value: humidity })}</span>
                 </div>
               )}
-              {wind && (
+              {windDir && (
                 <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
                   <span>🌬</span>
-                  <span>{wind}</span>
+                  <span>{t('weather.windFormat', { direction: t(WIND_DIR_KEY_MAP[windDir] || windDir), level: windPower })}</span>
                 </div>
               )}
             </div>

@@ -70,22 +70,25 @@ export default function Home() {
   const [weatherCode, setWeatherCode] = useState(null);
   const [weatherTemp, setWeatherTemp] = useState(null);
   const [weatherHumidity, setWeatherHumidity] = useState(null);
-  const [weatherWind, setWeatherWind] = useState(null);
+  const [weatherWindDir, setWeatherWindDir] = useState(null);
+  const [weatherWindPower, setWeatherWindPower] = useState(null);
 
   // Fetch weather data
   const refreshWeather = async (city) => {
-    if (!city || !city.adcode) return;
+    if (!city) return;
     try {
-      const weather = await fetchWeather(city.adcode);
+      const weather = await fetchWeather(city);
       setWeatherCode(weather.weather);
       setWeatherTemp(weather.temperature);
       setWeatherHumidity(weather.humidity);
-      setWeatherWind(`${weather.winddirection}风 ${weather.windpower}级`);
+      setWeatherWindDir(weather.winddirection);
+      setWeatherWindPower(weather.windpower);
       setCachedWeather({
         weather: weather.weather,
         temperature: weather.temperature,
         humidity: weather.humidity,
-        wind: `${weather.winddirection}风 ${weather.windpower}级`,
+        windDir: weather.winddirection,
+        windPower: weather.windpower,
       });
     } catch (e) {
       console.log("Weather fetch failed:", e);
@@ -196,7 +199,8 @@ export default function Home() {
         setWeatherCode(cached.weather);
         setWeatherTemp(cached.temperature);
         setWeatherHumidity(cached.humidity || null);
-        setWeatherWind(cached.wind || null);
+        setWeatherWindDir(cached.windDir || null);
+        setWeatherWindPower(cached.windPower || null);
       }
       refreshWeather(savedCity);
     } else {
@@ -1446,7 +1450,7 @@ export default function Home() {
                 className="p-4 px-0 border-b border-dashed"
               >
                 <div className="flex items-center justify-between">
-                  <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} wind={weatherWind} weatherCity={weatherCity} />
+                  <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} windDir={weatherWindDir} windPower={weatherWindPower} weatherCity={weatherCity} />
                   <div className="flex items-center gap-3">
                     <div className="text-right flex flex-col">
                       <div className="text-xl font-extrabold flex items-center gap-2">
@@ -1681,7 +1685,7 @@ export default function Home() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                       <CheckCircle className="h-4 w-4 text-primary" />
                     </div>
-                    PrioSpace
+                    Priospace Plus{i18n.language === "zh-TW" ? " 優事空間" : i18n.language === "zh-CN" ? " 优事空间" : ""}
                   </div>
                   <button
                     onClick={() => setShowSettings(true)}
@@ -1699,7 +1703,7 @@ export default function Home() {
                   className="p-4 border-b border-dashed px-6"
                 >
                   <div className="flex items-center justify-between">
-                    <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} wind={weatherWind} weatherCity={weatherCity} />
+                    <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} windDir={weatherWindDir} windPower={weatherWindPower} weatherCity={weatherCity} />
                     <div className="flex items-center gap-2">
                       <div className="text-right flex flex-col">
                         <div className="text-xl font-extrabold flex items-center gap-2">

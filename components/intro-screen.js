@@ -156,7 +156,7 @@ export function IntroScreen({ onAnimationComplete }) {
 
           <motion.h1
             variants={logoVariants}
-            className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-gray-100 text-center tracking-tight"
+            className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-gray-100 text-center tracking-tight whitespace-pre-line"
           >
             {t('intro.brandName')}
           </motion.h1>

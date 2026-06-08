@@ -115,7 +115,7 @@ export default function LandingPage() {
               variants={fadeInUp}
               className="font-heading text-3xl font-extrabold flex flex-col items-center gap-4"
             >
-              PrioSpace
+              Priospace Plus
             </motion.h1>
 
             <motion.p
