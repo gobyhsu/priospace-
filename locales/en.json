@@ -53,7 +53,7 @@
     "backupAndReset": "Backup & Reset",
     "maxSnapshots": "Up to 5 snapshots",
     "helpDesc": "View usage guide and feature descriptions",
-    "version": "PrioSpace V1.5.0",
+    "version": "PrioSpace V1.5.1",
     "tagline": "Focus · Track · Achieve",
     "localizedBy": "Localized by 迷汁逃桃",
     "language": "Language",
@@ -337,7 +337,21 @@
     "step7": "View statistics and productivity insights",
     "dragTitle": "Hidden skill discovered!",
     "dragDesc": "Long press a task to drag and reorder — you decide the priority ✨",
-    "dragDismiss": "Let me try"
+    "dragDismiss": "Let me try",
+    "addTaskTitle": "Quick tip",
+    "addTaskDesc": "Set priority, add tags, and due time to keep your tasks organized. Try the recurring option for daily habits!",
+    "timerTitle": "Timer tips",
+    "timerDesc": "Pick a task to track focus time. Minimize the timer to keep working — it runs in the background!",
+    "habitTitle": "Habit tracking",
+    "habitDesc": "Tap a day on the calendar to check in. Track your streaks and see monthly progress at a glance!",
+    "recurringTitle": "Recurring tasks",
+    "recurringDesc": "Create templates for tasks that repeat daily, weekly, or monthly. They auto-generate on each date!",
+    "settingsTitle": "Quick overview",
+    "settingsDesc": "Customize your theme, manage tags and habits, set your weather city, and explore data backup options."
+  },
+  "langSelect": {
+    "title": "选择语言",
+    "subtitle": "Language"
   },
   "help": {
     "title": "Help Center",

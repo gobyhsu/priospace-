@@ -331,8 +331,8 @@ export function AddTaskModal({
             </Button>
           </motion.div>
 
-          <GuideTip storageKey="guideAddTaskSeen" icon="💡" title="Quick tip">
-            Set priority, add tags, and due time to keep your tasks organized. Try the recurring option for daily habits!
+          <GuideTip storageKey="guideAddTaskSeen" icon="💡" title={t('guide.addTaskTitle')}>
+            {t('guide.addTaskDesc')}
           </GuideTip>
 
           <motion.div

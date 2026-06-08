@@ -731,8 +731,8 @@ export function TimerModal({
 
           {/* Immersive task name — always show when running */}
           {!isRunning && (
-            <GuideTip storageKey="guideTimerSeen" icon="💡" title="Timer tips">
-              Pick a task to track focus time. Minimize the timer to keep working — it runs in the background!
+            <GuideTip storageKey="guideTimerSeen" icon="💡" title={t('guide.timerTitle')}>
+              {t('guide.timerDesc')}
             </GuideTip>
           )}
 

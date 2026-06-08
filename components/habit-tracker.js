@@ -381,8 +381,8 @@ export function HabitTracker({
             </Button>
           </motion.div>
 
-          <GuideTip storageKey="guideHabitTrackerSeen" icon="💡" title="Habit tracking">
-            Tap a day on the calendar to check in. Track your streaks and see monthly progress at a glance!
+          <GuideTip storageKey="guideHabitTrackerSeen" icon="💡" title={t('guide.habitTitle')}>
+            {t('guide.habitDesc')}
           </GuideTip>
 
           <motion.div

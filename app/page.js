@@ -58,6 +58,10 @@ export default function Home() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showIntroScreen, setShowIntroScreen] = useState(true);
+  const [showLangSelect, setShowLangSelect] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem("language");
+  });
   const [showGuide, setShowGuide] = useState(false);
   const [parentTaskForSubtask, setParentTaskForSubtask] = useState(null);
   const [showWebRTCShare, setShowWebRTCShare] = useState(false);
@@ -1313,6 +1317,13 @@ export default function Home() {
     setDailyTasks({ ...dailyTasks, [dateString]: updatedTasks });
   };
 
+  const handleLanguageSelect = (langCode) => {
+    i18n.changeLanguage(langCode);
+    localStorage.setItem("language", langCode);
+    document.documentElement.lang = langCode;
+    setShowLangSelect(false);
+  };
+
   const resetApp = () => {
     if (!window.confirm(t('settings.resetConfirm'))) return;
     localStorage.clear();
@@ -1353,15 +1364,65 @@ export default function Home() {
     }
   });
 
+  const LANGUAGES = [
+    { code: "zh-CN", name: "简体中文", native: "简体中文" },
+    { code: "zh-TW", name: "繁體中文", native: "繁體中文" },
+    { code: "en", name: "English", native: "English" },
+    { code: "es", name: "Español", native: "Español" },
+  ];
+
   return (
     <>
+      {/* Language Selection — first-time only */}
       <AnimatePresence>
-        {showIntroScreen && (
+        {showLangSelect && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-[200] flex flex-col items-center justify-center gap-8 px-8"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <h1 className="text-3xl font-black text-white mb-2">选择语言</h1>
+              <p className="text-base font-semibold text-white/50">Language</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col gap-3 w-full max-w-xs"
+            >
+              {LANGUAGES.map((lang, i) => (
+                <motion.button
+                  key={lang.code}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25 + i * 0.08 }}
+                  onClick={() => handleLanguageSelect(lang.code)}
+                  className="w-full py-4 px-6 rounded-2xl border-2 border-white/20 bg-white/10 text-white text-lg font-bold hover:bg-white/20 hover:border-white/40 transition-all text-center"
+                >
+                  {lang.native}
+                </motion.button>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Intro Screen */}
+      <AnimatePresence>
+        {!showLangSelect && showIntroScreen && (
           <IntroScreen onAnimationComplete={() => setShowIntroScreen(false)} />
         )}
       </AnimatePresence>
 
-      {!showIntroScreen && (
+      {/* Main App */}
+      {!showLangSelect && !showIntroScreen && (
         <div className="min-h-screen transition-colors duration-300 bg-background">
           {/* Guide Overlay */}
           <AnimatePresence>
@@ -1378,14 +1439,6 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               className="flex flex-col h-screen relative"
             >
-              <button
-                onClick={() => setShowSettings(true)}
-                data-guide="settings"
-                className="settings-btn absolute left-1/2 -translate-x-1/2 z-10 bg-primary text-background rounded-b-lg py-2 px-2 pt-1"
-              >
-                <Settings className="h-3 w-3" />
-              </button>
-
               {/* Header Section */}
               <motion.div
                 whileTap={{ scale: 0.98 }}
@@ -1394,7 +1447,7 @@ export default function Home() {
               >
                 <div className="flex items-center justify-between">
                   <DayNightCycle selectedDate={selectedDate} weatherCode={weatherCode} temperature={weatherTemp} humidity={weatherHumidity} wind={weatherWind} weatherCity={weatherCity} />
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div className="text-right flex flex-col">
                       <div className="text-xl font-extrabold flex items-center gap-2">
                         <AnimatedNumber
@@ -1412,6 +1465,13 @@ export default function Home() {
                         />
                       </div>
                     </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
+                      data-guide="settings"
+                      className="settings-btn flex-shrink-0 bg-primary text-background rounded-xl p-2 hover:bg-primary/90 transition-colors"
+                    >
+                      <Settings className="h-5 w-5" />
+                    </button>
                   </div>
                 </div>
               </motion.div>

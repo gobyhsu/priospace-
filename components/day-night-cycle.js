@@ -8,12 +8,32 @@ import { useTranslation } from "react-i18next";
 
 const weekdayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
+function estimateTextWidth(text, fontSize) {
+  let w = 0;
+  for (const ch of text) {
+    const code = ch.charCodeAt(0);
+    // CJK + fullwidth chars — ~1× font-size
+    if (
+      (code >= 0x4e00 && code <= 0x9fff) ||
+      (code >= 0x3400 && code <= 0x4dbf) ||
+      (code >= 0x3000 && code <= 0x303f) ||
+      (code >= 0xff00 && code <= 0xffef)
+    ) {
+      w += fontSize;
+    } else {
+      // Latin / digits — ~0.6× font-size at extrabold
+      w += fontSize * 0.6;
+    }
+  }
+  return Math.ceil(w + fontSize * 0.3); // small padding
+}
+
 function AnimatedWeekday({ dayIndex, fontSize, textColor }) {
   const { t } = useTranslation();
-  const weekdays = weekdayKeys.map((key) => ({
-    day: t(`weekday.${key}`),
-    width: fontSize * 3.5,
-  }));
+  const weekdays = weekdayKeys.map((key) => {
+    const text = t(`weekday.${key}`);
+    return { day: text, width: estimateTextWidth(text, fontSize) };
+  });
 
   const height = fontSize * 1.2;
 
@@ -187,55 +207,57 @@ export function DayNightCycle({ selectedDate, weatherCode, temperature, humidity
       {/* Weather Detail Popup */}
       <AnimatePresence>
         {showWeatherDetail && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
-              onClick={() => setShowWeatherDetail(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="absolute left-0 top-full mt-2 z-50 min-w-[200px] p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
-            >
-              <div className="space-y-2">
-                {weatherCity && (
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <span>📍</span>
-                    <span>{weatherCity.name}</span>
-                  </div>
-                )}
-                {temperature != null && (
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <span>🌡</span>
-                    <span>{Math.round(temperature)}°C</span>
-                  </div>
-                )}
-                {weatherLabel && (
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <span>🌤</span>
-                    <span>{weatherLabel}</span>
-                  </div>
-                )}
-                {humidity && (
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <span>💧</span>
-                    <span>{t('weather.humidity', { value: humidity })}</span>
-                  </div>
-                )}
-                {wind && (
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                    <span>🌬</span>
-                    <span>{wind}</span>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
+          <motion.div
+            key="weather-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+            onClick={() => setShowWeatherDetail(false)}
+          />
+        )}
+        {showWeatherDetail && (
+          <motion.div
+            key="weather-popup"
+            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute left-0 top-full mt-2 z-50 min-w-[200px] p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+          >
+            <div className="space-y-2">
+              {weatherCity?.name && (
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                  <span>📍</span>
+                  <span>{weatherCity.name}</span>
+                </div>
+              )}
+              {temperature != null && (
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                  <span>🌡</span>
+                  <span>{Math.round(Number(temperature))}°C</span>
+                </div>
+              )}
+              {weatherLabel && (
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                  <span>🌤</span>
+                  <span>{weatherLabel}</span>
+                </div>
+              )}
+              {humidity != null && (
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                  <span>💧</span>
+                  <span>{t('weather.humidity', { value: humidity })}</span>
+                </div>
+              )}
+              {wind && (
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                  <span>🌬</span>
+                  <span>{wind}</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

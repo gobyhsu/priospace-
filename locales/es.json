@@ -53,7 +53,7 @@
     "backupAndReset": "Respaldo y reinicio",
     "maxSnapshots": "Máximo 5 instantáneas",
     "helpDesc": "Ver guía de uso y descripciones de funciones",
-    "version": "PrioSpace V1.5.0",
+    "version": "PrioSpace V1.5.1",
     "tagline": "Enfócate · Rastrea · Logra",
     "localizedBy": "Traducido por 迷汁逃桃",
     "language": "Idioma",
@@ -337,7 +337,21 @@
     "step7": "Ver estadísticas e información de productividad",
     "dragTitle": "¡Habilidad oculta descubierta!",
     "dragDesc": "Mantén presionada una tarea para arrastrar y reordenar ✨",
-    "dragDismiss": "Déjame intentar"
+    "dragDismiss": "Déjame intentar",
+    "addTaskTitle": "Consejo rápido",
+    "addTaskDesc": "Establece prioridad, añade etiquetas y fecha límite para mantener tus tareas organizadas. ¡Prueba las tareas recurrentes para hábitos diarios!",
+    "timerTitle": "Consejos del temporizador",
+    "timerDesc": "Elige una tarea para registrar el tiempo de enfoque. ¡Minimiza el temporizador y sigue trabajando — funciona en segundo plano!",
+    "habitTitle": "Seguimiento de hábitos",
+    "habitDesc": "Toca un día en el calendario para registrar. ¡Sigue tus rachas y ve el progreso mensual de un vistazo!",
+    "recurringTitle": "Tareas recurrentes",
+    "recurringDesc": "Crea plantillas para tareas que se repiten diaria, semanal o mensualmente. ¡Se generan automáticamente en cada fecha!",
+    "settingsTitle": "Vista rápida",
+    "settingsDesc": "Personaliza tu tema, gestiona etiquetas y hábitos, configura tu ciudad del clima y explora las opciones de copia de seguridad."
+  },
+  "langSelect": {
+    "title": "選擇語言",
+    "subtitle": "Language"
   },
   "help": {
     "title": "Centro de ayuda",

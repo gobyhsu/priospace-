@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { getSnapshots, restoreSnapshot, deleteSnapshot } from "@/lib/backup";
@@ -369,8 +369,8 @@ export function SettingsModal({
             </Button>
           </motion.div>
 
-          <GuideTip storageKey="guideSettingsSeen" icon="💡" title="Quick overview">
-            Customize your theme, manage tags and habits, set your weather city, and explore data backup options.
+          <GuideTip storageKey="guideSettingsSeen" icon="💡" title={t('guide.settingsTitle')}>
+            {t('guide.settingsDesc')}
           </GuideTip>
 
           <motion.div

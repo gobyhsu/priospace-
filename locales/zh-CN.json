@@ -53,7 +53,7 @@
     "backupAndReset": "备份与重置",
     "maxSnapshots": "最多保留 5 份",
     "helpDesc": "查看使用指南和功能说明",
-    "version": "优事空间 PrioSpace V1.5.0",
+    "version": "优事空间 PrioSpace V1.5.1",
     "tagline": "专注 · 追踪 · 成就",
     "localizedBy": "汉化 by 迷汁逃桃",
     "language": "语言",
@@ -337,7 +337,21 @@
     "step7": "查看统计数据，了解你的效率",
     "dragTitle": "发现隐藏技能！",
     "dragDesc": "长按任务可以拖拽排序，你来决定谁先谁后 ✨",
-    "dragDismiss": "我试试"
+    "dragDismiss": "我试试",
+    "addTaskTitle": "快速提示",
+    "addTaskDesc": "设置优先级、添加分类和截止时间，让任务井井有条。试试循环功能设置每日习惯！",
+    "timerTitle": "计时器技巧",
+    "timerDesc": "选择一个任务来追踪专注时间。最小化计时器窗口，它会在后台继续运行！",
+    "habitTitle": "习惯追踪",
+    "habitDesc": "点击日历上的某一天即可打卡。追踪你的连续天数，月度进展一目了然！",
+    "recurringTitle": "循环任务",
+    "recurringDesc": "创建每日、每周或每月自动重复的任务模板，省去手动添加的麻烦！",
+    "settingsTitle": "快速了解",
+    "settingsDesc": "自定义主题风格、管理分类标签和习惯、设置天气城市，还有数据备份功能。"
+  },
+  "langSelect": {
+    "title": "选择语言",
+    "subtitle": "Language"
   },
   "help": {
     "title": "帮助中心",

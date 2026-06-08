@@ -329,8 +329,8 @@ export function RecurringTasksModal({
             </Button>
           </motion.div>
 
-          <GuideTip storageKey="guideRecurringSeen" icon="💡" title="Recurring tasks">
-            Create templates for tasks that repeat daily, weekly, or monthly. They auto-generate on each date!
+          <GuideTip storageKey="guideRecurringSeen" icon="💡" title={t('guide.recurringTitle')}>
+            {t('guide.recurringDesc')}
           </GuideTip>
 
           <motion.div
