@@ -1,4 +1,4 @@
-# 🎯 优事空间 PrioSpace
+# 🎯 优事空间 PrioSpace Plus
 
 > **致谢 / Acknowledgements**
 >
@@ -21,7 +21,7 @@ A beautiful, modern productivity app that combines task management with Pomodoro
 
 ## 📋 修改声明 / Modification Notice
 
-**优事空间 PrioSpace 多语言版 / Multilingual Version**
+**优事空间 PrioSpace Plus 多语言版 / Multilingual Version**
 
 本项目基于 Anoy Roy Chowdhury 开发的 [PrioSpace](https://github.com/AnoyRC/priospace) 项目（MIT License）进行二次开发。 / This project is a derivative of [PrioSpace](https://github.com/AnoyRC/priospace) by Anoy Roy Chowdhury (MIT License).
 
