@@ -32,6 +32,10 @@ import {
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { saveSnapshot } from "@/lib/backup";
+import {
+  syncOnLaunch as cloudSyncOnLaunch,
+  schedulePush as cloudSchedulePush,
+} from "@/utils/cloud-sync";
 import { GuideOverlay, isGuideCompleted } from "@/components/guide-overlay";
 import { HelpModal } from "@/components/help-modal";
 
@@ -408,6 +412,63 @@ export default function Home() {
       if (snapshotTimerRef.current) clearTimeout(snapshotTimerRef.current);
     };
   }, [dailyTasks, customTags, habits]);
+
+  // Cloud sync: push on data change
+  const cloudSyncReady = useRef(false);
+  useEffect(() => {
+    if (!cloudSyncReady.current) return; // 首次加载不推送
+    const data = {
+      dailyTasks,
+      customTags,
+      habits,
+      recurringTasks,
+      darkMode,
+      theme,
+      weatherCity,
+      language: i18n.language,
+      updatedAt: Date.now(),
+    };
+    cloudSchedulePush(data);
+  }, [dailyTasks, customTags, habits]);
+
+  // Cloud sync: pull on initial load
+  useEffect(() => {
+    const doSync = async () => {
+      const localData = {
+        dailyTasks: JSON.parse(localStorage.getItem("dailyTasks") || "{}"),
+        customTags: JSON.parse(localStorage.getItem("customTags") || "[]"),
+        habits: JSON.parse(localStorage.getItem("habits") || "[]"),
+        recurringTasks: JSON.parse(localStorage.getItem("recurringTasks") || "[]"),
+        darkMode: JSON.parse(localStorage.getItem("darkMode") || "false"),
+        theme: localStorage.getItem("theme") || "default",
+        weatherCity: localStorage.getItem("weatherCity") ? JSON.parse(localStorage.getItem("weatherCity")) : null,
+        language: localStorage.getItem("language") || "zh-CN",
+        updatedAt: parseInt(localStorage.getItem("_updatedAt") || "0"),
+      };
+      const result = await cloudSyncOnLaunch(localData);
+      if (result.fromCloud) {
+        const m = result.merged;
+        setDailyTasks(m.dailyTasks);
+        setCustomTags(m.customTags);
+        setHabits(m.habits);
+        setRecurringTasks(m.recurringTasks || []);
+        if (m.darkMode !== undefined) setDarkMode(m.darkMode);
+        if (m.theme) setTheme(m.theme);
+        if (m.weatherCity) setWeatherCity(m.weatherCity);
+        if (m.language) i18n.changeLanguage(m.language);
+        // Save merged data to localStorage
+        localStorage.setItem("dailyTasks", JSON.stringify(m.dailyTasks));
+        localStorage.setItem("customTags", JSON.stringify(m.customTags));
+        localStorage.setItem("habits", JSON.stringify(m.habits));
+        localStorage.setItem("recurringTasks", JSON.stringify(m.recurringTasks || []));
+        localStorage.setItem("_updatedAt", String(Date.now()));
+      }
+      cloudSyncReady.current = true;
+    };
+    // 等数据加载完成后延迟 1s 执行同步
+    const timer = setTimeout(doSync, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const getDateString = (date) => {
     const year = date.getFullYear();
